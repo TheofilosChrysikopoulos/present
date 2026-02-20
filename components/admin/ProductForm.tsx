@@ -354,8 +354,8 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                   <FormItem>
                     <FormLabel>Category</FormLabel>
                     <Select
-                      value={field.value ?? ''}
-                      onValueChange={field.onChange}
+                      value={field.value || '__none__'}
+                      onValueChange={(val) => field.onChange(val === '__none__' ? '' : val)}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -363,7 +363,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No category</SelectItem>
+                        <SelectItem value="__none__">No category</SelectItem>
                         {categories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.id}>
                             {cat.name_en}
