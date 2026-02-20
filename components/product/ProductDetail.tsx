@@ -9,9 +9,10 @@ import { PriceBadge } from '@/components/shared/PriceBadge'
 import { TagList } from '@/components/shared/TagList'
 import { ProductImageGallery } from './ProductImageGallery'
 import { ColorVariantSelector } from './ColorVariantSelector'
+import { SizeVariantSelector } from './SizeVariantSelector'
 import { AddToCartButton } from './AddToCartButton'
 import { getLocalizedField, getLocalizedDescription } from '@/lib/types'
-import type { ProductWithImages, ProductVariantWithImages } from '@/lib/types'
+import type { ProductWithImages, ProductVariantWithImages, ProductSize } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
@@ -30,9 +31,14 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const ct = useTranslations('common')
 
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
+  const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null)
 
   const selectedVariant = selectedVariantId
     ? (product.product_variants?.find((v) => v.id === selectedVariantId) as ProductVariantWithImages | undefined) ?? null
+    : null
+
+  const selectedSize = selectedSizeId
+    ? (product.product_sizes?.find((s) => s.id === selectedSizeId) as ProductSize | undefined) ?? null
     : null
 
   const name = getLocalizedField(product, locale)
@@ -152,8 +158,22 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </>
           )}
 
+          {/* Size variants */}
+          {(product.product_sizes?.length ?? 0) > 0 && (
+            <>
+              <div className="mb-5">
+                <SizeVariantSelector
+                  sizes={product.product_sizes as ProductSize[]}
+                  selectedSizeId={selectedSizeId}
+                  onSelect={setSelectedSizeId}
+                />
+              </div>
+              <Separator className="my-5" />
+            </>
+          )}
+
           {/* Add to cart */}
-          <AddToCartButton product={product} selectedVariant={selectedVariant} />
+          <AddToCartButton product={product} selectedVariant={selectedVariant} selectedSize={selectedSize} />
 
           {/* Description */}
           {description && (

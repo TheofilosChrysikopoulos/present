@@ -8,8 +8,15 @@ export interface CartVariant {
   primaryImagePath: string | null
 }
 
+export interface CartSize {
+  id: string
+  labelEn: string
+  labelEl: string
+  skuSuffix: string | null
+}
+
 export interface CartItem {
-  // Unique per cart entry: `${productId}:${variantId ?? 'base'}`
+  // Unique per cart entry: `${productId}:${variantId ?? 'base'}:${sizeId ?? 'base'}`
   id: string
   productId: string
   sku: string
@@ -19,6 +26,7 @@ export interface CartItem {
   moq: number
   qty: number
   variant: CartVariant | null
+  size: CartSize | null
   primaryImagePath: string | null
 }
 

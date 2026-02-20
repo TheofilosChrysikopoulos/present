@@ -57,9 +57,10 @@ export async function generateCartPdf(
       borderBottomWidth: 1,
       borderBottomColor: '#e7e5e4',
     },
-    colSku: { width: '18%' },
-    colName: { width: '42%' },
-    colColor: { width: '16%' },
+    colSku: { width: '16%' },
+    colName: { width: '32%' },
+    colColor: { width: '14%' },
+    colSize: { width: '14%' },
     colQty: { width: '10%', textAlign: 'right' },
     colPrice: { width: '14%', textAlign: 'right' },
     headerText: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#78716c' },
@@ -138,6 +139,9 @@ export async function generateCartPdf(
           <Text style={[styles.colColor, styles.headerText]}>
             {isEl ? 'Χρώμα' : 'Color'}
           </Text>
+          <Text style={[styles.colSize, styles.headerText]}>
+            {isEl ? 'Μέγεθος' : 'Size'}
+          </Text>
           <Text style={[styles.colQty, styles.headerText]}>
             {isEl ? 'Ποσ.' : 'Qty'}
           </Text>
@@ -158,6 +162,13 @@ export async function generateCartPdf(
                 ? isEl
                   ? item.variant.colorNameEl
                   : item.variant.colorNameEn
+                : '—'}
+            </Text>
+            <Text style={[styles.colSize, styles.cellText]}>
+              {item.size
+                ? isEl
+                  ? item.size.labelEl
+                  : item.size.labelEn
                 : '—'}
             </Text>
             <Text style={[styles.colQty, styles.cellText]}>{item.qty}</Text>

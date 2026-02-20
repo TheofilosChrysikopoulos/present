@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/form'
 import { ImageUploader, type UploadedImage } from './ImageUploader'
 import { VariantEditor, type VariantData } from './VariantEditor'
+import { SizeEditor, type SizeData } from './SizeEditor'
 import { createClient } from '@/lib/supabase/client'
 import type { Category, ProductWithImages } from '@/lib/types'
 
@@ -79,6 +80,16 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         sort_order: vi.sort_order,
         is_primary: vi.is_primary,
       })),
+    })) ?? []
+  )
+
+  const [sizes, setSizes] = useState<SizeData[]>(
+    product?.product_sizes?.map((s) => ({
+      id: s.id,
+      label_en: s.label_en,
+      label_el: s.label_el,
+      sku_suffix: s.sku_suffix ?? '',
+      sort_order: s.sort_order,
     })) ?? []
   )
 
@@ -216,6 +227,46 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         }
       }
 
+      // Save sizes
+      // Delete sizes not in the current list
+      if (product?.id) {
+        const keepSizeIds = sizes.filter((s) => s.id).map((s) => s.id!)
+        if (keepSizeIds.length > 0) {
+          await supabase
+            .from('product_sizes')
+            .delete()
+            .eq('product_id', savedId)
+            .not('id', 'in', `(${keepSizeIds.map((id) => `'${id}'`).join(',')})`)
+        } else {
+          await supabase
+            .from('product_sizes')
+            .delete()
+            .eq('product_id', savedId)
+        }
+      }
+
+      for (let i = 0; i < sizes.length; i++) {
+        const s = sizes[i]
+        const sizeData = {
+          product_id: savedId,
+          label_en: s.label_en,
+          label_el: s.label_el,
+          sku_suffix: s.sku_suffix || null,
+          sort_order: i,
+        }
+
+        if (s.id) {
+          await supabase
+            .from('product_sizes')
+            .update(sizeData)
+            .eq('id', s.id)
+        } else {
+          await supabase
+            .from('product_sizes')
+            .insert({ ...sizeData, id: crypto.randomUUID() })
+        }
+      }
+
       toast.success('Product saved successfully')
       router.push(`${base}/admin/products`)
       router.refresh()
@@ -235,6 +286,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="images">Images</TabsTrigger>
             <TabsTrigger value="variants">Color Variants</TabsTrigger>
+            <TabsTrigger value="sizes">Size Variants</TabsTrigger>
           </TabsList>
 
           {/* Basic Info */}
@@ -437,6 +489,14 @@ export function ProductForm({ product, categories }: ProductFormProps) {
               variants={variants}
               onChange={setVariants}
               productId={product?.id ?? productId}
+            />
+          </TabsContent>
+
+          {/* Sizes */}
+          <TabsContent value="sizes" className="pt-5">
+            <SizeEditor
+              sizes={sizes}
+              onChange={setSizes}
             />
           </TabsContent>
         </Tabs>

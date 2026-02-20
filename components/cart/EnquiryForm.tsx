@@ -59,6 +59,9 @@ export function EnquiryForm() {
       variant_id: item.variant?.id,
       variant_color_en: item.variant?.colorNameEn,
       variant_color_el: item.variant?.colorNameEl,
+      size_id: item.size?.id,
+      size_label_en: item.size?.labelEn,
+      size_label_el: item.size?.labelEl,
     }))
 
     try {

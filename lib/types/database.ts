@@ -77,6 +77,16 @@ export interface VariantImage {
   created_at: string
 }
 
+export interface ProductSize {
+  id: string
+  product_id: string
+  label_en: string
+  label_el: string
+  sku_suffix: string | null
+  sort_order: number
+  created_at: string
+}
+
 export interface Enquiry {
   id: string
   name: string
@@ -99,12 +109,16 @@ export interface EnquiryCartItem {
   variant_id?: string
   variant_color_en?: string
   variant_color_el?: string
+  size_id?: string
+  size_label_en?: string
+  size_label_el?: string
 }
 
 // Composite types for joined queries
 export interface ProductWithImages extends Product {
   product_images: ProductImage[]
   product_variants: ProductVariantWithImages[]
+  product_sizes: ProductSize[]
   categories: Category | null
 }
 

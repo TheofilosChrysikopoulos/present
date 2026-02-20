@@ -28,6 +28,7 @@
     "tags": "Ετικέτες",
     "description": "Περιγραφή",
     "colors": "Διαθέσιμα Χρώματα",
+    "sizes": "Διαθέσιμα Μεγέθη",
     "quantity": "Ποσότητα",
     "inCart": "Στο Καλάθι",
     "relatedProducts": "Σχετικά Προϊόντα",
@@ -132,6 +133,7 @@
       "basicInfo": "Βασικές Πληροφορίες",
       "images": "Εικόνες",
       "variants": "Παραλλαγές Χρώματος",
+      "sizes": "Παραλλαγές Μεγέθους",
       "sku": "Κωδικός Προϊόντος / SKU",
       "skuPlaceholder": "π.χ. MUG-001",
       "nameEn": "Όνομα (Αγγλικά)",
@@ -167,6 +169,15 @@
       "typeSwatch": "Δείγμα Χρώματος",
       "typeImage": "Με Εικόνα",
       "removeVariant": "Αφαίρεση"
+    },
+    "sizeForm": {
+      "addSize": "Προσθήκη Παραλλαγής Μεγέθους",
+      "labelEn": "Ετικέτα Μεγέθους (Αγγλικά)",
+      "labelEl": "Ετικέτα Μεγέθους (Ελληνικά)",
+      "labelPlaceholder": "π.χ. Μεγάλο",
+      "skuSuffix": "Κατάληξη SKU (προαιρετικό)",
+      "skuSuffixPlaceholder": "π.χ. -LG",
+      "removeSize": "Αφαίρεση"
     },
     "imageUploader": {
       "drag": "Σύρετε & αφήστε εικόνες εδώ",

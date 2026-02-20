@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { useCart } from '@/hooks/useCart'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import type { ProductVariantWithImages } from '@/lib/types'
+import type { ProductVariantWithImages, ProductSize } from '@/lib/types'
 
 interface AddToCartButtonProps {
   product: {
@@ -21,6 +21,7 @@ interface AddToCartButtonProps {
     product_images?: Array<{ storage_path: string; is_primary: boolean }>
   }
   selectedVariant?: ProductVariantWithImages | null
+  selectedSize?: ProductSize | null
 }
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
@@ -32,6 +33,7 @@ function imgUrl(path: string) {
 export function AddToCartButton({
   product,
   selectedVariant,
+  selectedSize,
 }: AddToCartButtonProps) {
   const t = useTranslations('product')
   const locale = useLocale()
@@ -40,7 +42,8 @@ export function AddToCartButton({
   const [justAdded, setJustAdded] = useState(false)
 
   const variantId = selectedVariant?.id
-  const inCart = isInCart(product.id, variantId)
+  const sizeId = selectedSize?.id
+  const inCart = isInCart(product.id, variantId, sizeId)
 
   const primaryImage =
     product.product_images?.find((img) => img.is_primary) ??
@@ -64,20 +67,33 @@ export function AddToCartButton({
         }
       : null
 
+    const sizeInfo = selectedSize
+      ? {
+          id: selectedSize.id,
+          labelEn: selectedSize.label_en,
+          labelEl: selectedSize.label_el,
+          skuSuffix: selectedSize.sku_suffix,
+        }
+      : null
+
+    let sku = product.sku
+    if (selectedVariant?.sku_suffix) sku += selectedVariant.sku_suffix
+    if (selectedSize?.sku_suffix) sku += selectedSize.sku_suffix
+
     addItem({
       productId: product.id,
-      sku: selectedVariant?.sku_suffix
-        ? `${product.sku}${selectedVariant.sku_suffix}`
-        : product.sku,
+      sku,
       nameEn: product.name_en,
       nameEl: product.name_el,
       price: product.price,
       moq: product.moq,
       qty,
       variant: variantInfo,
+      size: sizeInfo,
       primaryImagePath:
         variantPrimaryImage?.storage_path ?? primaryImage?.storage_path ?? null,
       variantId,
+      sizeId,
     })
 
     setJustAdded(true)

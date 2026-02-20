@@ -16,12 +16,12 @@ interface CartContextValue {
   items: CartItem[]
   totalItems: number
   totalUniqueItems: number
-  addItem: (item: Omit<CartItem, 'id'> & { variantId?: string }) => void
+  addItem: (item: Omit<CartItem, 'id'> & { variantId?: string; sizeId?: string }) => void
   updateQty: (id: string, qty: number) => void
   removeItem: (id: string) => void
   clearCart: () => void
-  isInCart: (productId: string, variantId?: string) => boolean
-  getItemQty: (productId: string, variantId?: string) => number
+  isInCart: (productId: string, variantId?: string, sizeId?: string) => boolean
+  getItemQty: (productId: string, variantId?: string, sizeId?: string) => number
 }
 
 const CartContext = createContext<CartContextValue | null>(null)
@@ -54,8 +54,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [state.items])
 
   const addItem = useCallback(
-    (itemInput: Omit<CartItem, 'id'> & { variantId?: string }) => {
-      const id = `${itemInput.productId}:${itemInput.variantId ?? 'base'}`
+    (itemInput: Omit<CartItem, 'id'> & { variantId?: string; sizeId?: string }) => {
+      const id = `${itemInput.productId}:${itemInput.variantId ?? 'base'}:${itemInput.sizeId ?? 'base'}`
       const item: CartItem = {
         id,
         productId: itemInput.productId,
@@ -66,6 +66,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         moq: itemInput.moq,
         qty: Math.max(itemInput.qty, itemInput.moq),
         variant: itemInput.variant,
+        size: itemInput.size,
         primaryImagePath: itemInput.primaryImagePath,
       }
       dispatch({ type: 'ADD_ITEM', payload: item })
@@ -86,16 +87,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const isInCart = useCallback(
-    (productId: string, variantId?: string) => {
-      const id = `${productId}:${variantId ?? 'base'}`
+    (productId: string, variantId?: string, sizeId?: string) => {
+      const id = `${productId}:${variantId ?? 'base'}:${sizeId ?? 'base'}`
       return state.items.some((i) => i.id === id)
     },
     [state.items]
   )
 
   const getItemQty = useCallback(
-    (productId: string, variantId?: string) => {
-      const id = `${productId}:${variantId ?? 'base'}`
+    (productId: string, variantId?: string, sizeId?: string) => {
+      const id = `${productId}:${variantId ?? 'base'}:${sizeId ?? 'base'}`
       return state.items.find((i) => i.id === id)?.qty ?? 0
     },
     [state.items]

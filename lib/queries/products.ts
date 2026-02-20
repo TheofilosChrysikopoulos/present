@@ -15,6 +15,7 @@ const PRODUCT_DETAIL_QUERY = `
     id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, sort_order,
     variant_images (id, storage_path, alt_en, alt_el, sort_order, is_primary)
   ),
+  product_sizes (id, label_en, label_el, sku_suffix, sort_order),
   categories (id, slug, name_en, name_el, parent_id, sort_order)
 `
 
@@ -139,6 +140,7 @@ export async function getProductBySku(sku: string): Promise<ProductWithImages | 
         id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, sort_order,
         variant_images (id, storage_path, alt_en, alt_el, sort_order, is_primary)
       ),
+      product_sizes (id, label_en, label_el, sku_suffix, sort_order),
       categories (id, slug, name_en, name_el, parent_id, sort_order)
     `)
     .eq('sku', sku)
@@ -160,6 +162,7 @@ export async function getProductById(id: string): Promise<ProductWithImages | nu
         id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, sort_order,
         variant_images (id, storage_path, alt_en, alt_el, sort_order, is_primary)
       ),
+      product_sizes (id, label_en, label_el, sku_suffix, sort_order),
       categories (id, slug, name_en, name_el, parent_id, sort_order)
     `)
     .eq('id', id)

@@ -28,6 +28,7 @@
     "tags": "Tags",
     "description": "Description",
     "colors": "Available Colors",
+    "sizes": "Available Sizes",
     "quantity": "Quantity",
     "inCart": "In Cart",
     "relatedProducts": "Related Products",
@@ -132,6 +133,7 @@
       "basicInfo": "Basic Information",
       "images": "Images",
       "variants": "Color Variants",
+      "sizes": "Size Variants",
       "sku": "SKU / Product Code",
       "skuPlaceholder": "e.g. MUG-001",
       "nameEn": "Name (English)",
@@ -167,6 +169,15 @@
       "typeSwatch": "Color Swatch",
       "typeImage": "With Image",
       "removeVariant": "Remove"
+    },
+    "sizeForm": {
+      "addSize": "Add Size Variant",
+      "labelEn": "Size Label (English)",
+      "labelEl": "Size Label (Greek)",
+      "labelPlaceholder": "e.g. Large",
+      "skuSuffix": "SKU Suffix (optional)",
+      "skuSuffixPlaceholder": "e.g. -LG",
+      "removeSize": "Remove"
     },
     "imageUploader": {
       "drag": "Drag & drop images here",

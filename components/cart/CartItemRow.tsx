@@ -31,6 +31,11 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
       ? item.variant.colorNameEl
       : item.variant.colorNameEn
     : null
+  const sizeName = item.size
+    ? locale === 'el'
+      ? item.size.labelEl
+      : item.size.labelEn
+    : null
 
   const productHref = locale === 'el'
     ? `/el/product/${item.sku.split('-')[0]}`
@@ -76,6 +81,11 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
                   />
                 )}
                 <span className="text-xs text-stone-500">{colorName}</span>
+              </div>
+            )}
+            {sizeName && (
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-xs text-stone-500">{sizeName}</span>
               </div>
             )}
           </div>
