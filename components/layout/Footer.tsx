@@ -6,24 +6,24 @@ export async function Footer() {
   const base = locale === 'el' ? '/el' : ''
 
   return (
-    <footer className="border-t border-stone-200 bg-stone-50 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+    <footer className="border-t border-border mt-auto">
+      <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-16 md:py-20">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-12">
           <div>
-            <p className="font-bold text-stone-900 text-lg mb-2">ePresent</p>
-            <p className="text-sm text-stone-500 leading-relaxed">
+            <p className="font-semibold text-foreground text-xl tracking-tight mb-4">ePresent</p>
+            <p className="text-muted-foreground leading-relaxed max-w-xs">
               Wholesale tourist products for retailers and distributors across Greece and Europe.
             </p>
           </div>
           <div>
-            <p className="font-semibold text-stone-700 mb-3 text-sm uppercase tracking-wide">
+            <p className="font-medium text-foreground mb-4 text-xs uppercase tracking-wider">
               Catalog
             </p>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               <li>
                 <Link
                   href={`${base}/catalog`}
-                  className="text-sm text-stone-500 hover:text-stone-800 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-200"
                 >
                   All Products
                 </Link>
@@ -31,7 +31,7 @@ export async function Footer() {
               <li>
                 <Link
                   href={`${base}/catalog?featured=true`}
-                  className="text-sm text-stone-500 hover:text-stone-800 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-200"
                 >
                   Featured
                 </Link>
@@ -39,7 +39,7 @@ export async function Footer() {
               <li>
                 <Link
                   href={`${base}/catalog?new=true`}
-                  className="text-sm text-stone-500 hover:text-stone-800 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-200"
                 >
                   New Arrivals
                 </Link>
@@ -47,14 +47,14 @@ export async function Footer() {
             </ul>
           </div>
           <div>
-            <p className="font-semibold text-stone-700 mb-3 text-sm uppercase tracking-wide">
+            <p className="font-medium text-foreground mb-4 text-xs uppercase tracking-wider">
               Business
             </p>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               <li>
                 <Link
                   href={`${base}/cart`}
-                  className="text-sm text-stone-500 hover:text-stone-800 transition-colors"
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-200"
                 >
                   Your Selection
                 </Link>
@@ -62,7 +62,7 @@ export async function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 pt-6 border-t border-stone-200 text-xs text-stone-400">
+        <div className="mt-12 pt-8 border-t border-border text-sm text-muted-foreground">
           © {new Date().getFullYear()} ePresent. All rights reserved.
         </div>
       </div>

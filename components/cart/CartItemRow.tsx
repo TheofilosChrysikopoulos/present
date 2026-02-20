@@ -42,9 +42,9 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
     : `/product/${item.sku.split('-')[0]}`
 
   return (
-    <div className={cn('flex gap-3', compact ? 'py-2' : 'py-4')}>
+    <div className={cn('flex gap-4', compact ? 'py-3' : 'py-5')}>
       {/* Image */}
-      <div className={cn('relative flex-shrink-0 rounded-lg overflow-hidden bg-stone-100',
+      <div className={cn('relative flex-shrink-0 rounded-xl overflow-hidden bg-secondary',
         compact ? 'h-14 w-14' : 'h-20 w-20')}>
         {item.primaryImagePath ? (
           <Image
@@ -55,7 +55,7 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
             className="object-cover"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-stone-300">
+          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/30">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
@@ -68,31 +68,31 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-stone-900 line-clamp-2 leading-snug">
+            <p className="text-sm font-medium text-foreground line-clamp-2 leading-snug">
               {name}
             </p>
-            <p className="text-xs text-stone-400 font-mono mt-0.5">{item.sku}</p>
+            <p className="text-xs text-muted-foreground font-mono mt-0.5">{item.sku}</p>
             {colorName && (
-              <div className="flex items-center gap-1.5 mt-1">
+              <div className="flex items-center gap-1.5 mt-1.5">
                 {item.variant?.hexColor && (
                   <span
-                    className="h-3 w-3 rounded-full border border-stone-200 flex-shrink-0"
+                    className="h-3.5 w-3.5 rounded-full border border-border flex-shrink-0"
                     style={{ backgroundColor: item.variant.hexColor }}
                   />
                 )}
-                <span className="text-xs text-stone-500">{colorName}</span>
+                <span className="text-xs text-muted-foreground">{colorName}</span>
               </div>
             )}
             {sizeName && (
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-xs text-stone-500">{sizeName}</span>
+                <span className="text-xs text-muted-foreground">{sizeName}</span>
               </div>
             )}
           </div>
 
           <button
             onClick={() => removeItem(item.id)}
-            className="flex-shrink-0 text-stone-400 hover:text-stone-600 transition-colors"
+            className="flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors"
             aria-label={t('remove')}
           >
             <X className={cn(compact ? 'h-3.5 w-3.5' : 'h-4 w-4')} />
@@ -100,12 +100,12 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
         </div>
 
         {!compact && (
-          <div className="mt-2 flex items-center justify-between">
+          <div className="mt-3 flex items-center justify-between">
             {/* Qty stepper */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={() => updateQty(item.id, item.qty - 1)}
-                className="h-7 w-7 rounded border border-stone-200 flex items-center justify-center text-stone-600 hover:bg-stone-50"
+                className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-foreground hover:bg-secondary transition-colors"
                 aria-label="Decrease"
               >
                 <Minus className="h-3 w-3" />
@@ -113,13 +113,13 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
               <span className="w-8 text-center text-sm font-medium">{item.qty}</span>
               <button
                 onClick={() => updateQty(item.id, item.qty + 1)}
-                className="h-7 w-7 rounded border border-stone-200 flex items-center justify-center text-stone-600 hover:bg-stone-50"
+                className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-foreground hover:bg-secondary transition-colors"
                 aria-label="Increase"
               >
                 <Plus className="h-3 w-3" />
               </button>
               {item.moq > 1 && (
-                <span className="text-xs text-stone-400 ml-1">min {item.moq}</span>
+                <span className="text-xs text-muted-foreground ml-1">min {item.moq}</span>
               )}
             </div>
 
@@ -128,7 +128,7 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
         )}
 
         {compact && (
-          <p className="text-xs text-stone-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1.5">
             {t('qty')}: {item.qty} × <PriceBadge price={item.price} size="sm" />
           </p>
         )}

@@ -35,18 +35,18 @@ export function ProductSearch() {
 
   return (
     <div className="relative">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" />
+      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
       <Input
         type="search"
         placeholder={t('search')}
         defaultValue={currentQ}
         onChange={(e) => updateSearch(e.target.value)}
-        className="pl-9 pr-8 bg-stone-50 border-stone-200 focus-visible:ring-1 focus-visible:ring-stone-400"
+        className="pl-10 pr-10 h-11 bg-secondary border-transparent focus-visible:bg-background focus-visible:border-border rounded-xl"
       />
       {currentQ && (
         <button
           onClick={clearSearch}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
           aria-label="Clear search"
         >
           <X className="h-4 w-4" />

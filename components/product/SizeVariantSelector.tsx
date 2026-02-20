@@ -24,7 +24,7 @@ export function SizeVariantSelector({
 
   return (
     <div>
-      <p className="text-sm font-medium text-stone-700 mb-2">{t('sizes')}</p>
+      <p className="text-sm font-medium text-foreground mb-3">{t('sizes')}</p>
       <div className="flex items-center gap-2 flex-wrap">
         {sorted.map((size) => {
           const isSelected = selectedSizeId === size.id
@@ -35,10 +35,10 @@ export function SizeVariantSelector({
               key={size.id}
               onClick={() => onSelect(isSelected ? null : size.id)}
               className={cn(
-                'px-3 py-1.5 rounded-lg border text-sm font-medium transition-all',
+                'px-4 py-2 rounded-xl border text-sm font-medium transition-all duration-200',
                 isSelected
-                  ? 'border-stone-900 bg-stone-900 text-white shadow-md'
-                  : 'border-stone-200 text-stone-700 hover:border-stone-400 hover:bg-stone-50'
+                  ? 'border-foreground bg-foreground text-background'
+                  : 'border-border text-foreground hover:border-muted-foreground hover:bg-secondary'
               )}
               aria-pressed={isSelected}
               aria-label={label}
@@ -50,7 +50,7 @@ export function SizeVariantSelector({
       </div>
 
       {selectedSizeId && (
-        <p className="mt-1.5 text-xs text-stone-500">
+        <p className="mt-2 text-sm text-muted-foreground">
           {sorted.find((s) => s.id === selectedSizeId)
             ? locale === 'el'
               ? sorted.find((s) => s.id === selectedSizeId)!.label_el

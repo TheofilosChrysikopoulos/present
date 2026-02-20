@@ -86,14 +86,14 @@ export function EnquiryForm() {
 
   if (submitted) {
     return (
-      <div className="py-4 text-center">
-        <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+      <div className="py-6 text-center">
+        <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
           <Send className="h-5 w-5 text-green-600" />
         </div>
-        <p className="text-sm text-stone-700 font-medium">{t('success')}</p>
+        <p className="text-sm text-foreground font-medium">{t('success')}</p>
         <button
           onClick={() => setSubmitted(false)}
-          className="mt-3 text-xs text-stone-400 hover:text-stone-600 underline"
+          className="mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
         >
           Send another enquiry
         </button>
@@ -103,9 +103,9 @@ export function EnquiryForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-        <h2 className="font-semibold text-stone-900 mb-1">{t('title')}</h2>
-        <p className="text-xs text-stone-500 mb-3">{t('subtitle')}</p>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <h2 className="font-semibold text-foreground mb-1">{t('title')}</h2>
+        <p className="text-xs text-muted-foreground mb-4">{t('subtitle')}</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <FormField
@@ -199,7 +199,7 @@ export function EnquiryForm() {
           )}
         />
 
-        <p className="text-xs text-stone-400">
+        <p className="text-xs text-muted-foreground">
           {t('cartSummary', { count: items.length })}
         </p>
 

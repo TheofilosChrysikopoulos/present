@@ -57,30 +57,30 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const base = locale === 'el' ? '/el' : ''
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 md:py-16">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-stone-500 mb-6">
-        <Link href={`${base}/`} className="hover:text-stone-800">{ct('back')}</Link>
-        <span>/</span>
-        <Link href={`${base}/catalog`} className="hover:text-stone-800">
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-10">
+        <Link href={`${base}/`} className="hover:text-foreground transition-colors">{ct('back')}</Link>
+        <span className="text-border">/</span>
+        <Link href={`${base}/catalog`} className="hover:text-foreground transition-colors">
           Catalog
         </Link>
         {product.categories && (
           <>
-            <span>/</span>
+            <span className="text-border">/</span>
             <Link
               href={`${base}/catalog/${product.categories.slug}`}
-              className="hover:text-stone-800"
+              className="hover:text-foreground transition-colors"
             >
               {getLocalizedField(product.categories, locale)}
             </Link>
           </>
         )}
-        <span>/</span>
-        <span className="text-stone-900 font-medium truncate max-w-48">{name}</span>
+        <span className="text-border">/</span>
+        <span className="text-foreground font-medium truncate max-w-48">{name}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
         {/* Image gallery */}
         <div>
           <ProductImageGallery
@@ -93,30 +93,30 @@ export function ProductDetail({ product }: ProductDetailProps) {
         {/* Product info */}
         <div>
           {/* Badges */}
-          <div className="flex gap-2 mb-3">
+          <div className="flex gap-2 mb-4">
             {product.is_new_arrival && (
-              <Badge className="bg-stone-900 text-white text-xs">
+              <Badge className="bg-foreground text-background text-xs font-medium">
                 {ct('newArrival')}
               </Badge>
             )}
             {product.is_featured && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="outline" className="text-xs">
                 {ct('featured')}
               </Badge>
             )}
           </div>
 
-          <h1 className="text-2xl font-bold text-stone-900 mb-1">{name}</h1>
-          <p className="text-sm text-stone-400 font-mono mb-4">
+          <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight mb-2">{name}</h1>
+          <p className="text-sm text-muted-foreground font-mono mb-6">
             {t('sku')}: {product.sku}
             {selectedVariant?.sku_suffix && selectedVariant.sku_suffix}
           </p>
 
           {/* Price and MOQ */}
-          <div className="flex items-baseline gap-3 mb-4">
+          <div className="flex items-baseline gap-4 mb-6">
             <PriceBadge price={product.price} size="lg" />
             {product.moq > 1 && (
-              <span className="text-sm text-stone-500">
+              <span className="text-sm text-muted-foreground">
                 {t('moqNote', { moq: product.moq })}
               </span>
             )}
@@ -124,11 +124,11 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
           {/* Category */}
           {product.categories && (
-            <div className="flex items-center gap-2 mb-4 text-sm">
-              <span className="text-stone-500">{t('category')}:</span>
+            <div className="flex items-center gap-2 mb-6 text-sm">
+              <span className="text-muted-foreground">{t('category')}:</span>
               <Link
                 href={`${base}/catalog/${product.categories.slug}`}
-                className="text-stone-700 hover:text-stone-900 font-medium"
+                className="text-foreground hover:text-muted-foreground font-medium transition-colors"
               >
                 {getLocalizedField(product.categories, locale)}
               </Link>
@@ -137,38 +137,38 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
           {/* Tags */}
           {product.tags.length > 0 && (
-            <div className="mb-4">
+            <div className="mb-6">
               <TagList tags={product.tags} />
             </div>
           )}
 
-          <Separator className="my-5" />
+          <Separator className="my-8" />
 
           {/* Color variants */}
           {(product.product_variants?.length ?? 0) > 0 && (
             <>
-              <div className="mb-5">
+              <div className="mb-6">
                 <ColorVariantSelector
                   variants={product.product_variants as ProductVariantWithImages[]}
                   selectedVariantId={selectedVariantId}
                   onSelect={setSelectedVariantId}
                 />
               </div>
-              <Separator className="my-5" />
+              <Separator className="my-8" />
             </>
           )}
 
           {/* Size variants */}
           {(product.product_sizes?.length ?? 0) > 0 && (
             <>
-              <div className="mb-5">
+              <div className="mb-6">
                 <SizeVariantSelector
                   sizes={product.product_sizes as ProductSize[]}
                   selectedSizeId={selectedSizeId}
                   onSelect={setSelectedSizeId}
                 />
               </div>
-              <Separator className="my-5" />
+              <Separator className="my-8" />
             </>
           )}
 
@@ -178,12 +178,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
           {/* Description */}
           {description && (
             <>
-              <Separator className="my-6" />
+              <Separator className="my-8" />
               <div>
-                <h2 className="text-sm font-semibold text-stone-700 mb-2">
+                <h2 className="text-sm font-medium text-foreground mb-3">
                   {t('description')}
                 </h2>
-                <p className="text-sm text-stone-600 leading-relaxed whitespace-pre-wrap">
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
                   {description}
                 </p>
               </div>

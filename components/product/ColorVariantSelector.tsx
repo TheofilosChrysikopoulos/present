@@ -31,8 +31,8 @@ export function ColorVariantSelector({
 
   return (
     <div>
-      <p className="text-sm font-medium text-stone-700 mb-2">{t('colors')}</p>
-      <div className="flex items-center gap-2 flex-wrap">
+      <p className="text-sm font-medium text-foreground mb-3">{t('colors')}</p>
+      <div className="flex items-center gap-3 flex-wrap">
         {/* "No variant" option to reset to base product */}
         {sorted.map((variant) => {
           const isSelected = selectedVariantId === variant.id
@@ -49,17 +49,17 @@ export function ColorVariantSelector({
                 onClick={() => onSelect(isSelected ? null : variant.id)}
                 title={colorName}
                 className={cn(
-                  'relative h-12 w-12 rounded-lg overflow-hidden border-2 transition-all',
+                  'relative h-14 w-14 rounded-xl overflow-hidden transition-all duration-200',
                   isSelected
-                    ? 'border-stone-900 shadow-md'
-                    : 'border-stone-200 hover:border-stone-400'
+                    ? 'ring-2 ring-foreground ring-offset-2 scale-105'
+                    : 'ring-1 ring-border hover:ring-muted-foreground'
                 )}
               >
                 <Image
                   src={imgUrl(primaryVariantImage.storage_path)}
                   alt={colorName}
                   fill
-                  sizes="48px"
+                  sizes="56px"
                   className="object-cover"
                 />
               </button>
@@ -73,12 +73,12 @@ export function ColorVariantSelector({
               onClick={() => onSelect(isSelected ? null : variant.id)}
               title={colorName}
               className={cn(
-                'h-8 w-8 rounded-full border-2 transition-all flex-shrink-0',
+                'h-9 w-9 rounded-full transition-all duration-200 flex-shrink-0',
                 isSelected
-                  ? 'border-stone-900 scale-110 shadow-md'
-                  : 'border-stone-200 hover:border-stone-400 hover:scale-105'
+                  ? 'ring-2 ring-foreground ring-offset-2 scale-110'
+                  : 'ring-1 ring-border hover:ring-muted-foreground hover:scale-105'
               )}
-              style={{ backgroundColor: variant.hex_color ?? '#e7e5e4' }}
+              style={{ backgroundColor: variant.hex_color ?? '#e5e5e5' }}
               aria-pressed={isSelected}
               aria-label={colorName}
             />
@@ -87,7 +87,7 @@ export function ColorVariantSelector({
       </div>
 
       {selectedVariantId && (
-        <p className="mt-1.5 text-xs text-stone-500">
+        <p className="mt-2 text-sm text-muted-foreground">
           {sorted.find((v) => v.id === selectedVariantId)
             ? locale === 'el'
               ? sorted.find((v) => v.id === selectedVariantId)!.color_name_el

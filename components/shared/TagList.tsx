@@ -11,14 +11,14 @@ export function TagList({ tags, className, onTagClick }: TagListProps) {
   if (!tags.length) return null
 
   return (
-    <div className={cn('flex flex-wrap gap-1.5', className)}>
+    <div className={cn('flex flex-wrap gap-2', className)}>
       {tags.map((tag) => (
         <Badge
           key={tag}
           variant="secondary"
           className={cn(
-            'text-xs font-normal text-stone-600 bg-stone-100 border-stone-200',
-            onTagClick && 'cursor-pointer hover:bg-stone-200 transition-colors'
+            'text-xs font-normal text-muted-foreground bg-secondary border-transparent',
+            onTagClick && 'cursor-pointer hover:bg-secondary/80 transition-colors'
           )}
           onClick={onTagClick ? () => onTagClick(tag) : undefined}
         >

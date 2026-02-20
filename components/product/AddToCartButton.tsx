@@ -103,19 +103,19 @@ export function AddToCartButton({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Quantity selector */}
       <div>
-        <label className="text-sm font-medium text-stone-700 mb-1.5 block">
+        <label className="text-sm font-medium text-foreground mb-2 block">
           {t('quantity')}
         </label>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setQty((q) => Math.max(product.moq, q - 1))}
-            className="h-9 w-9 rounded-md border border-stone-200 flex items-center justify-center text-stone-600 hover:bg-stone-50 transition-colors"
+            className="h-10 w-10 rounded-xl border border-border flex items-center justify-center text-foreground hover:bg-secondary transition-colors"
             aria-label="Decrease quantity"
           >
-            <Minus className="h-3.5 w-3.5" />
+            <Minus className="h-4 w-4" />
           </button>
           <Input
             type="number"
@@ -124,17 +124,17 @@ export function AddToCartButton({
             onChange={(e) =>
               setQty(Math.max(product.moq, Number(e.target.value) || product.moq))
             }
-            className="w-20 text-center h-9"
+            className="w-20 text-center h-10"
           />
           <button
             onClick={() => setQty((q) => q + 1)}
-            className="h-9 w-9 rounded-md border border-stone-200 flex items-center justify-center text-stone-600 hover:bg-stone-50 transition-colors"
+            className="h-10 w-10 rounded-xl border border-border flex items-center justify-center text-foreground hover:bg-secondary transition-colors"
             aria-label="Increase quantity"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-4 w-4" />
           </button>
           {product.moq > 1 && (
-            <span className="text-xs text-stone-400">
+            <span className="text-xs text-muted-foreground">
               {t('moqNote', { moq: product.moq })}
             </span>
           )}
@@ -146,7 +146,7 @@ export function AddToCartButton({
         onClick={handleAdd}
         size="lg"
         className={cn(
-          'w-full gap-2 transition-all',
+          'w-full gap-2 transition-all h-12 text-base',
           justAdded && 'bg-green-600 hover:bg-green-700'
         )}
       >

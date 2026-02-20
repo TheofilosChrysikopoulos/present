@@ -61,26 +61,26 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   })
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-stone-900 mb-1">{t('title')}</h1>
+    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 md:py-16">
+      <div className="mb-10">
+        <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight mb-2">{t('title')}</h1>
         {total > 0 && (
-          <p className="text-sm text-stone-500">
+          <p className="text-muted-foreground">
             {t('showing', { count: total })}
           </p>
         )}
       </div>
 
       {/* Search bar */}
-      <div className="mb-6 max-w-md">
+      <div className="mb-10 max-w-lg">
         <Suspense>
           <ProductSearch />
         </Suspense>
       </div>
 
-      <div className="flex gap-8">
+      <div className="flex gap-12">
         {/* Filters sidebar */}
-        <div className="hidden lg:block w-52 flex-shrink-0">
+        <div className="hidden lg:block w-60 flex-shrink-0">
           <Suspense>
             <ProductFilters tree={tree} />
           </Suspense>
@@ -90,7 +90,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         <div className="flex-1 min-w-0">
           {products.length === 0 ? (
             <EmptyState
-              icon={<Package className="h-12 w-12" />}
+              icon={<Package className="h-16 w-16" />}
               title={t('noResults')}
               description={t('noResultsHint')}
             />
@@ -142,22 +142,22 @@ function Pagination({
   }
 
   return (
-    <div className="mt-8 flex items-center justify-center gap-2">
+    <div className="mt-12 flex items-center justify-center gap-3">
       {page > 1 && (
         <a
           href={buildUrl(page - 1)}
-          className="px-3 py-1.5 text-sm border border-stone-200 rounded-md text-stone-600 hover:bg-stone-50"
+          className="px-5 py-2.5 text-sm font-medium border border-border rounded-full text-foreground hover:bg-secondary transition-colors duration-200"
         >
           Previous
         </a>
       )}
-      <span className="text-sm text-stone-500">
+      <span className="text-sm text-muted-foreground px-4">
         Page {page} of {totalPages}
       </span>
       {page < totalPages && (
         <a
           href={buildUrl(page + 1)}
-          className="px-3 py-1.5 text-sm border border-stone-200 rounded-md text-stone-600 hover:bg-stone-50"
+          className="px-5 py-2.5 text-sm font-medium bg-foreground text-background rounded-full hover:bg-foreground/90 transition-colors duration-200"
         >
           Next
         </a>

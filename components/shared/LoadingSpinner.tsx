@@ -4,7 +4,7 @@ export function LoadingSpinner({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'animate-spin rounded-full border-2 border-stone-200 border-t-stone-700',
+        'animate-spin rounded-full border-2 border-border border-t-foreground',
         'h-6 w-6',
         className
       )}

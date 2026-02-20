@@ -59,10 +59,10 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={href}
-      className="group block bg-white rounded-xl border border-stone-200 overflow-hidden hover:border-stone-300 hover:shadow-md transition-all duration-200"
+      className="group block bg-white rounded-2xl border border-border overflow-hidden hover:border-muted-foreground/30 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
     >
       {/* Image container */}
-      <div className="relative aspect-square bg-stone-50 overflow-hidden">
+      <div className="relative aspect-[4/5] bg-secondary overflow-hidden">
         {primaryImage ? (
           <Image
             src={getImageUrl(primaryImage.storage_path)}
@@ -72,12 +72,12 @@ export function ProductCard({ product }: ProductCardProps) {
             }
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-stone-300">
+          <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/30">
             <svg
-              className="h-16 w-16"
+              className="h-20 w-20"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -93,16 +93,16 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
+        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
           {product.is_new_arrival && (
-            <Badge className="bg-stone-900 text-white text-[10px] px-1.5 py-0.5 h-auto">
+            <Badge className="bg-foreground text-background text-[10px] px-2 py-0.5 h-auto font-medium">
               {ct('newArrival')}
             </Badge>
           )}
           {product.is_featured && (
             <Badge
-              variant="secondary"
-              className="text-[10px] px-1.5 py-0.5 h-auto"
+              variant="outline"
+              className="bg-white/90 backdrop-blur text-[10px] px-2 py-0.5 h-auto"
             >
               {ct('featured')}
             </Badge>
@@ -111,16 +111,16 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
 
       {/* Info */}
-      <div className="p-3">
-        <p className="text-[11px] text-stone-400 font-mono mb-0.5">{product.sku}</p>
-        <h3 className="text-sm font-medium text-stone-900 line-clamp-2 leading-snug">
+      <div className="p-5">
+        <p className="text-xs text-muted-foreground font-mono mb-1.5">{product.sku}</p>
+        <h3 className="text-[15px] font-medium text-foreground line-clamp-2 leading-snug tracking-tight">
           {name}
         </h3>
 
-        <div className="mt-2 flex items-center justify-between gap-2">
+        <div className="mt-3 flex items-center justify-between gap-2">
           <PriceBadge price={product.price} size="sm" />
           {product.moq > 1 && (
-            <span className="text-[11px] text-stone-400">
+            <span className="text-xs text-muted-foreground">
               {t('moqNote', { moq: product.moq })}
             </span>
           )}
@@ -128,17 +128,17 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Color swatches */}
         {swatches.length > 0 && (
-          <div className="mt-2 flex items-center gap-1">
+          <div className="mt-3 flex items-center gap-1.5">
             {swatches.map((v) => (
               <span
                 key={v.id}
-                className="h-3.5 w-3.5 rounded-full border border-stone-200 flex-shrink-0"
-                style={{ backgroundColor: v.hex_color ?? '#e7e5e4' }}
+                className="h-4 w-4 rounded-full border border-border flex-shrink-0 transition-transform hover:scale-110"
+                style={{ backgroundColor: v.hex_color ?? '#e5e5e5' }}
                 title={locale === 'el' ? v.color_name_el : v.color_name_en}
               />
             ))}
             {(product.product_variants?.length ?? 0) > 4 && (
-              <span className="text-[10px] text-stone-400">
+              <span className="text-xs text-muted-foreground">
                 +{(product.product_variants?.length ?? 0) - 4}
               </span>
             )}

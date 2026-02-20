@@ -14,15 +14,15 @@ export function CartIcon() {
   return (
     <Link
       href={href}
-      className="relative flex items-center justify-center h-9 w-9 rounded-md text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors"
+      className="relative flex items-center justify-center h-10 w-10 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
       aria-label={`Cart (${totalItems} items)`}
     >
       <ShoppingCart className="h-5 w-5" />
       {totalItems > 0 && (
         <span
           className={cn(
-            'absolute -top-0.5 -right-0.5 h-4 min-w-4 px-0.5 rounded-full',
-            'bg-stone-900 text-white text-[10px] font-bold flex items-center justify-center',
+            'absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full',
+            'bg-foreground text-background text-[10px] font-bold flex items-center justify-center',
             'leading-none tabular-nums'
           )}
         >

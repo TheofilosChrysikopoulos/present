@@ -42,7 +42,7 @@ export function ProductImageGallery({
 
   if (!images.length) {
     return (
-      <div className="aspect-square bg-stone-100 rounded-xl flex items-center justify-center text-stone-300">
+      <div className="aspect-square bg-secondary rounded-2xl flex items-center justify-center text-muted-foreground/30">
         <svg
           className="h-24 w-24"
           fill="none"
@@ -61,9 +61,9 @@ export function ProductImageGallery({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {/* Main image */}
-      <div className="relative aspect-square rounded-xl overflow-hidden bg-stone-50">
+      <div className="relative aspect-square rounded-2xl overflow-hidden bg-secondary">
         <Image
           src={imgUrl(active.storage_path)}
           alt={
@@ -78,16 +78,16 @@ export function ProductImageGallery({
 
       {/* Thumbnails */}
       {sorted.length > 1 && (
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-3 flex-wrap">
           {sorted.map((img, i) => (
             <button
               key={img.id}
               onClick={() => setActiveIndex(i)}
               className={cn(
-                'relative h-16 w-16 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all',
+                'relative h-20 w-20 rounded-xl overflow-hidden flex-shrink-0 transition-all duration-200',
                 i === activeIndex
-                  ? 'border-stone-900 opacity-100'
-                  : 'border-stone-200 opacity-70 hover:opacity-100'
+                  ? 'ring-2 ring-foreground ring-offset-2'
+                  : 'opacity-60 hover:opacity-100'
               )}
             >
               <Image
@@ -96,7 +96,7 @@ export function ProductImageGallery({
                   (locale === 'el' ? img.alt_el : img.alt_en) ?? `Image ${i + 1}`
                 }
                 fill
-                sizes="64px"
+                sizes="80px"
                 className="object-cover"
               />
             </button>

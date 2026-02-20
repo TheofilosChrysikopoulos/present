@@ -29,13 +29,13 @@ export function CartPageClient() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
+      <div className="max-w-3xl mx-auto px-6 sm:px-8 py-24">
         <EmptyState
-          icon={<ShoppingCart className="h-16 w-16" />}
+          icon={<ShoppingCart className="h-20 w-20" />}
           title={t('empty')}
           description={t('emptyHint')}
           action={
-            <Button asChild>
+            <Button asChild size="lg" className="mt-4">
               <Link href={`${base}/catalog`}>{t('browseCatalog')}</Link>
             </Button>
           }
@@ -45,11 +45,11 @@ export function CartPageClient() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-stone-900">
+    <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-12 md:py-16">
+      <div className="flex items-center justify-between mb-10">
+        <h1 className="text-3xl font-semibold text-foreground tracking-tight">
           {t('title')}
-          <span className="ml-2 text-base font-normal text-stone-400">
+          <span className="ml-3 text-lg font-normal text-muted-foreground">
             ({totalItems} {totalItems === 1 ? t('item') : t('items')})
           </span>
         </h1>
@@ -58,26 +58,26 @@ export function CartPageClient() {
             clearCart()
             toast.info(t('cartCleared'))
           }}
-          className="text-sm text-stone-500 hover:text-stone-700 underline"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           {t('clearCart')}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Cart items */}
         <div className="lg:col-span-2">
-          <div className="bg-white border border-stone-200 rounded-xl divide-y divide-stone-100">
+          <div className="bg-white border border-border rounded-2xl divide-y divide-border overflow-hidden">
             {items.map((item) => (
-              <div key={item.id} className="px-4">
+              <div key={item.id} className="px-5">
                 <CartItemRow item={item} />
               </div>
             ))}
           </div>
 
           {/* Subtotal */}
-          <div className="mt-4 flex items-center justify-between px-4 py-3 bg-stone-50 rounded-xl border border-stone-200">
-            <span className="text-sm font-medium text-stone-700">
+          <div className="mt-6 flex items-center justify-between px-5 py-4 bg-secondary rounded-2xl">
+            <span className="text-sm font-medium text-foreground">
               Estimated Total
             </span>
             <PriceBadge price={subtotal} size="lg" />
@@ -85,15 +85,15 @@ export function CartPageClient() {
         </div>
 
         {/* Sidebar: actions + enquiry form */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Export PDF */}
-          <div className="bg-white border border-stone-200 rounded-xl p-4 space-y-3">
-            <h2 className="font-semibold text-stone-900">{t('title')}</h2>
+          <div className="bg-white border border-border rounded-2xl p-6 space-y-4">
+            <h2 className="font-semibold text-foreground">{t('title')}</h2>
             <CartPdfExport />
           </div>
 
           {/* Enquiry form */}
-          <div className="bg-white border border-stone-200 rounded-xl p-4">
+          <div className="bg-white border border-border rounded-2xl p-6">
             <EnquiryForm />
           </div>
         </div>

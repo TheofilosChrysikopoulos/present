@@ -30,14 +30,14 @@ export function LanguageToggle() {
       variant="ghost"
       size="sm"
       onClick={toggle}
-      className="text-stone-600 hover:text-stone-900 font-medium text-sm gap-1 px-2"
+      className="text-muted-foreground hover:text-foreground font-medium text-sm gap-1 px-3 h-10 rounded-xl"
       aria-label={locale === 'en' ? 'Switch to Greek' : 'Switch to English'}
     >
-      <span className={locale === 'en' ? 'font-bold text-stone-900' : 'text-stone-400'}>
+      <span className={locale === 'en' ? 'font-semibold text-foreground' : 'text-muted-foreground'}>
         EN
       </span>
-      <span className="text-stone-300">/</span>
-      <span className={locale === 'el' ? 'font-bold text-stone-900' : 'text-stone-400'}>
+      <span className="text-border">/</span>
+      <span className={locale === 'el' ? 'font-semibold text-foreground' : 'text-muted-foreground'}>
         EL
       </span>
     </Button>

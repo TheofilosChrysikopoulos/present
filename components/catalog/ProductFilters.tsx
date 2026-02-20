@@ -53,14 +53,14 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
 
   return (
     <aside className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-stone-900">{t('filters')}</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="font-semibold text-foreground tracking-tight">{t('filters')}</h2>
         {hasFilters && (
           <Button
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="text-stone-500 text-xs h-7 px-2 gap-1"
+            className="text-muted-foreground text-xs h-7 px-2 gap-1 hover:text-foreground"
           >
             <X className="h-3 w-3" />
             {t('clearFilters')}
@@ -69,18 +69,18 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
       </div>
 
       {/* Categories */}
-      <div className="mb-5">
-        <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+      <div className="mb-6">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
           {t('categories')}
         </h3>
-        <div className="space-y-0.5">
+        <div className="space-y-1">
           <Link
             href={`${base}/catalog`}
             className={cn(
-              'flex items-center px-2 py-1.5 rounded-md text-sm transition-colors',
+              'flex items-center px-3 py-2 rounded-xl text-sm transition-all duration-200',
               !currentCategorySlug
-                ? 'bg-stone-900 text-white'
-                : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                ? 'bg-foreground text-background font-medium'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
             )}
           >
             {t('allCategories')}
@@ -98,20 +98,20 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
         </div>
       </div>
 
-      <Separator className="my-4" />
+      <Separator className="my-6" />
 
       {/* Active tag filters */}
       {activeTags.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+        <div className="mb-6">
+          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
             Active Tags
           </h3>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {activeTags.map((tag) => (
               <button
                 key={tag}
                 onClick={() => toggleTag(tag)}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-stone-900 text-white text-xs font-medium"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground text-background text-xs font-medium transition-opacity hover:opacity-80"
               >
                 {tag}
                 <X className="h-3 w-3" />
@@ -141,18 +141,18 @@ function CategoryFilterItem({
   const hasChildren = (cat.children?.length ?? 0) > 0
 
   return (
-    <div style={{ paddingLeft: depth > 0 ? `${depth * 12}px` : undefined }}>
+    <div style={{ paddingLeft: depth > 0 ? `${depth * 14}px` : undefined }}>
       <Link
         href={`${base}/catalog/${cat.slug}`}
         className={cn(
-          'flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-colors',
+          'flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all duration-200',
           isActive
-            ? 'bg-stone-900 text-white'
-            : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+            ? 'bg-foreground text-background font-medium'
+            : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
         )}
       >
         <span>{getLocalizedField(cat, locale)}</span>
-        {hasChildren && <ChevronRight className="h-3 w-3 opacity-50" />}
+        {hasChildren && <ChevronRight className="h-3.5 w-3.5 opacity-50" />}
       </Link>
       {hasChildren &&
         cat.children!.map((child) => (

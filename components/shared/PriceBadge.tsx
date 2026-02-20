@@ -15,10 +15,10 @@ export function PriceBadge({ price, className, size = 'md' }: PriceBadgeProps) {
   return (
     <span
       className={cn(
-        'font-semibold text-stone-900 tabular-nums',
+        'font-semibold text-foreground tabular-nums tracking-tight',
         size === 'sm' && 'text-sm',
         size === 'md' && 'text-base',
-        size === 'lg' && 'text-xl',
+        size === 'lg' && 'text-2xl',
         className
       )}
     >

@@ -41,7 +41,7 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
       <nav className="flex flex-col gap-1">
         <Link
           href={locale === 'el' ? '/el/catalog' : '/catalog'}
-          className="px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 rounded-md"
+          className="px-4 py-2.5 text-sm font-medium text-foreground hover:bg-secondary rounded-xl transition-colors duration-200"
           onClick={onClose}
         >
           {t('allProducts')}
@@ -67,10 +67,10 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
       <Link
         href={locale === 'el' ? '/el/catalog' : '/catalog'}
         className={cn(
-          'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+          'px-4 py-2 text-sm font-medium rounded-full transition-all duration-200',
           pathname.endsWith('/catalog') || pathname.endsWith('/catalog/')
-            ? 'text-stone-900 bg-stone-100'
-            : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+            ? 'bg-foreground text-background'
+            : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
         )}
       >
         {t('allProducts')}
@@ -111,28 +111,28 @@ function DesktopCategoryItem({
       <Link
         href={getCategoryHref(cat.slug)}
         className={cn(
-          'flex items-center gap-0.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
+          'flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200',
           isActive(cat.slug)
-            ? 'text-stone-900 bg-stone-100'
-            : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+            ? 'bg-foreground text-background'
+            : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
         )}
       >
         {getLocalizedField(cat, locale)}
-        {hasChildren && <ChevronDown className="h-3 w-3 opacity-50" />}
+        {hasChildren && <ChevronDown className="h-3.5 w-3.5 opacity-60" />}
       </Link>
 
       {hasChildren && open && (
-        <div className="absolute left-0 top-full pt-1 z-50">
-          <div className="bg-white border border-stone-200 rounded-lg shadow-lg py-1 min-w-40">
+        <div className="absolute left-0 top-full pt-2 z-50">
+          <div className="bg-white border border-border rounded-2xl shadow-xl py-2 min-w-48 animate-scale-in">
             {cat.children!.map((child) => (
               <Link
                 key={child.id}
                 href={getCategoryHref(child.slug)}
                 className={cn(
-                  'block px-4 py-2 text-sm transition-colors',
+                  'block px-4 py-2.5 text-sm transition-colors duration-200',
                   isActive(child.slug)
-                    ? 'text-stone-900 bg-stone-50'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                    ? 'text-foreground bg-secondary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                 )}
               >
                 {getLocalizedField(child, locale)}
@@ -171,10 +171,10 @@ function MobileCategoryItem({
         <Link
           href={getCategoryHref(cat.slug)}
           className={cn(
-            'flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors',
+            'flex-1 px-4 py-2.5 text-sm font-medium rounded-xl transition-colors duration-200',
             isActive(cat.slug)
-              ? 'text-stone-900 bg-stone-100'
-              : 'text-stone-700 hover:bg-stone-100'
+              ? 'text-foreground bg-secondary'
+              : 'text-foreground hover:bg-secondary'
           )}
           onClick={onClose}
         >
@@ -183,10 +183,10 @@ function MobileCategoryItem({
         {hasChildren && (
           <button
             onClick={() => toggleExpand(cat.id)}
-            className="p-2 text-stone-500"
+            className="p-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronDown
-              className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-180')}
+              className={cn('h-4 w-4 transition-transform duration-200', isExpanded && 'rotate-180')}
             />
           </button>
         )}
@@ -197,7 +197,7 @@ function MobileCategoryItem({
             <Link
               key={child.id}
               href={getCategoryHref(child.slug)}
-              className="px-3 py-1.5 text-sm text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded-md"
+              className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-secondary rounded-xl transition-colors duration-200"
               onClick={onClose}
             >
               {getLocalizedField(child, locale)}

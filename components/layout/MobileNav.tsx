@@ -23,9 +23,9 @@ export function MobileNav({ tree }: { tree: CategoryWithChildren[] }) {
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="w-72 pt-6">
-          <SheetHeader className="mb-4">
-            <SheetTitle className="font-bold text-lg text-stone-900">
+        <SheetContent side="left" className="w-80 pt-8">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="font-semibold text-xl text-foreground tracking-tight">
               ePresent
             </SheetTitle>
           </SheetHeader>
