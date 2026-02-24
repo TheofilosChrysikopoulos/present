@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-stone-50 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <p className="text-2xl font-bold text-stone-900">ePresent</p>
+          <p className="text-2xl font-bold text-stone-900">PRESENT ACCESSORIES</p>
           <p className="text-stone-500 mt-1">Admin Panel</p>
         </div>
 

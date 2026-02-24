@@ -143,7 +143,7 @@ export async function generateCartPdf(
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logo}>ePresent</Text>
+          <Text style={styles.logo}>PRESENT ACCESSORIES</Text>
           <Text style={styles.subtitle}>
             {isEl ? 'Τουριστικά Προϊόντα Χονδρικής' : 'Wholesale Tourist Products'}
           </Text>
@@ -224,8 +224,8 @@ export async function generateCartPdf(
         <View style={styles.note}>
           <Text style={styles.noteText}>
             {isEl
-              ? 'Αυτή η επιλογή δημιουργήθηκε μέσω του καταλόγου ePresent. Οι τιμές είναι ενδεικτικές τιμές χονδρικής. Επικοινωνήστε μαζί μας για να ολοκληρώσετε την παραγγελία σας.'
-              : 'This selection was created via the ePresent catalog. Prices shown are indicative wholesale prices. Contact us to finalise your order.'}
+              ? 'Αυτή η επιλογή δημιουργήθηκε μέσω του καταλόγου PRESENT ACCESSORIES. Οι τιμές είναι ενδεικτικές τιμές χονδρικής. Επικοινωνήστε μαζί μας για να ολοκληρώσετε την παραγγελία σας.'
+              : 'This selection was created via the PRESENT ACCESSORIES catalog. Prices shown are indicative wholesale prices. Contact us to finalise your order.'}
           </Text>
         </View>
       </Page>

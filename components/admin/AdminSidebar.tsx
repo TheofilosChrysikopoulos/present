@@ -62,7 +62,7 @@ export function AdminSidebar() {
       {/* Logo */}
       <div className="p-5 border-b border-stone-100">
         <Link href={`${base}/`} className="font-bold text-lg text-stone-900">
-          ePresent
+          PRESENT ACCESSORIES
         </Link>
         <p className="text-xs text-stone-500 mt-0.5">Admin Panel</p>
       </div>

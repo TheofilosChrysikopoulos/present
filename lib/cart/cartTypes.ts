@@ -42,4 +42,4 @@ export type CartAction =
   | { type: 'HYDRATE'; payload: CartItem[] }
   | { type: 'CLEAR' }
 
-export const CART_STORAGE_KEY = 'epresent_cart'
+export const CART_STORAGE_KEY = 'present_accessories_cart'
