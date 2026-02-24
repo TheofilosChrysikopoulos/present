@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate magic link via Supabase Admin API (does NOT send an email)
-    const baseUrl = request.nextUrl.origin
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin
     const { data: linkData, error: linkError } = await supabase.auth.admin.generateLink({
       type: 'magiclink',
       email,
