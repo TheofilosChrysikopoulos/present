@@ -17,8 +17,8 @@ export function TagList({ tags, className, onTagClick }: TagListProps) {
           key={tag}
           variant="secondary"
           className={cn(
-            'text-xs font-normal text-stone-600 bg-stone-100 border-stone-200',
-            onTagClick && 'cursor-pointer hover:bg-stone-200 transition-colors'
+            'text-xs font-normal text-slate-600 bg-slate-100 border-slate-200',
+            onTagClick && 'cursor-pointer hover:bg-slate-200 transition-colors'
           )}
           onClick={onTagClick ? () => onTagClick(tag) : undefined}
         >

@@ -8,6 +8,7 @@ import {
   Package,
   FolderTree,
   Mail,
+  Users,
   LogOut,
   ChevronRight,
 } from 'lucide-react'
@@ -18,7 +19,7 @@ export function AdminSidebar() {
   const locale = useLocale()
   const pathname = usePathname()
   const router = useRouter()
-  const base = locale === 'el' ? '/el' : ''
+  const base = locale === 'en' ? '/en' : ''
 
   const navItems = [
     {
@@ -41,6 +42,11 @@ export function AdminSidebar() {
       href: `${base}/admin/enquiries`,
       label: 'Enquiries',
       icon: Mail,
+    },
+    {
+      href: `${base}/admin/users`,
+      label: 'Users',
+      icon: Users,
     },
   ]
 

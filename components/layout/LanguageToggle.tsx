@@ -13,14 +13,14 @@ export function LanguageToggle() {
     const nextLocale = locale === 'en' ? 'el' : 'en'
 
     // Swap locale prefix in path
-    // English routes: /catalog → /el/catalog
-    // Greek routes: /el/catalog → /catalog
+    // Greek routes (default): /catalog → /en/catalog
+    // English routes: /en/catalog → /catalog
     let newPath: string
-    if (locale === 'en') {
-      newPath = `/el${pathname}`
+    if (locale === 'el') {
+      newPath = `/en${pathname}`
     } else {
-      // Strip /el prefix
-      newPath = pathname.replace(/^\/el/, '') || '/'
+      // Strip /en prefix
+      newPath = pathname.replace(/^\/en/, '') || '/'
     }
     router.push(newPath)
   }
@@ -30,14 +30,14 @@ export function LanguageToggle() {
       variant="ghost"
       size="sm"
       onClick={toggle}
-      className="text-stone-600 hover:text-stone-900 font-medium text-sm gap-1 px-2"
+      className="text-[#1e3a5f]/70 hover:text-[#1e3a5f] hover:bg-[#1e3a5f]/10 font-medium text-sm gap-1 px-2"
       aria-label={locale === 'en' ? 'Switch to Greek' : 'Switch to English'}
     >
-      <span className={locale === 'en' ? 'font-bold text-stone-900' : 'text-stone-400'}>
+      <span className={locale === 'en' ? 'font-bold text-[#1e3a5f]' : 'text-[#1e3a5f]/40'}>
         EN
       </span>
-      <span className="text-stone-300">/</span>
-      <span className={locale === 'el' ? 'font-bold text-stone-900' : 'text-stone-400'}>
+      <span className="text-[#1e3a5f]/30">/</span>
+      <span className={locale === 'el' ? 'font-bold text-[#1e3a5f]' : 'text-[#1e3a5f]/40'}>
         EL
       </span>
     </Button>

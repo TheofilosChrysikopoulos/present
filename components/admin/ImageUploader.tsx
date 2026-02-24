@@ -133,13 +133,13 @@ export function ImageUploader({
                 img.is_primary ? 'border-stone-900' : 'border-stone-200'
               )}
             >
-              <div className="aspect-square relative">
+              <div className="aspect-square relative bg-white">
                 <Image
                   src={imgUrl(img.storage_path)}
                   alt={img.alt_en ?? 'Product image'}
                   fill
                   sizes="100px"
-                  className="object-cover"
+                  className="object-contain p-1"
                 />
               </div>
 

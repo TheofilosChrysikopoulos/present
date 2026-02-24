@@ -3,8 +3,9 @@
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useLocale, useTranslations } from 'next-intl'
-import { ShoppingCart, FileDown } from 'lucide-react'
+import { ShoppingCart, FileDown, Lock } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
+import { useUser } from '@/hooks/useUser'
 import { CartItemRow } from '@/components/cart/CartItemRow'
 import { EnquiryForm } from '@/components/cart/EnquiryForm'
 import { Button } from '@/components/ui/button'
@@ -22,8 +23,32 @@ const CartPdfExport = dynamic(
 export function CartPageClient() {
   const locale = useLocale()
   const t = useTranslations('cart')
+  const tAuth = useTranslations('auth')
   const { items, clearCart, totalItems } = useCart()
-  const base = locale === 'el' ? '/el' : ''
+  const { isApproved, isAuthenticated, loading: userLoading } = useUser()
+  const base = locale === 'en' ? '/en' : ''
+
+  // Gate: redirect unapproved users
+  if (!userLoading && !isApproved) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-16 text-center">
+        <Lock className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+        <h1 className="text-xl font-bold text-[#1e3a5f] mb-2">
+          {isAuthenticated ? tAuth('pendingApproval') : tAuth('loginToOrder')}
+        </h1>
+        {!isAuthenticated && (
+          <div className="flex gap-3 justify-center mt-4">
+            <Button asChild variant="outline">
+              <Link href={`${base}/auth/login`}>{tAuth('loginLink')}</Link>
+            </Button>
+            <Button asChild>
+              <Link href={`${base}/auth/register`}>{tAuth('registerLink')}</Link>
+            </Button>
+          </div>
+        )}
+      </div>
+    )
+  }
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0)
 
@@ -47,9 +72,9 @@ export function CartPageClient() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-stone-900">
+        <h1 className="text-2xl font-bold text-[#1e3a5f]">
           {t('title')}
-          <span className="ml-2 text-base font-normal text-stone-400">
+          <span className="ml-2 text-base font-normal text-slate-400">
             ({totalItems} {totalItems === 1 ? t('item') : t('items')})
           </span>
         </h1>
@@ -58,7 +83,7 @@ export function CartPageClient() {
             clearCart()
             toast.info(t('cartCleared'))
           }}
-          className="text-sm text-stone-500 hover:text-stone-700 underline"
+          className="text-sm text-slate-500 hover:text-slate-700 underline"
         >
           {t('clearCart')}
         </button>
@@ -67,7 +92,7 @@ export function CartPageClient() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart items */}
         <div className="lg:col-span-2">
-          <div className="bg-white border border-stone-200 rounded-xl divide-y divide-stone-100">
+          <div className="bg-white border border-slate-200 rounded-xl divide-y divide-slate-100">
             {items.map((item) => (
               <div key={item.id} className="px-4">
                 <CartItemRow item={item} />
@@ -76,8 +101,8 @@ export function CartPageClient() {
           </div>
 
           {/* Subtotal */}
-          <div className="mt-4 flex items-center justify-between px-4 py-3 bg-stone-50 rounded-xl border border-stone-200">
-            <span className="text-sm font-medium text-stone-700">
+          <div className="mt-4 flex items-center justify-between px-4 py-3 bg-slate-50 rounded-xl border border-slate-200">
+            <span className="text-sm font-medium text-slate-700">
               Estimated Total
             </span>
             <PriceBadge price={subtotal} size="lg" />
@@ -87,13 +112,13 @@ export function CartPageClient() {
         {/* Sidebar: actions + enquiry form */}
         <div className="space-y-4">
           {/* Export PDF */}
-          <div className="bg-white border border-stone-200 rounded-xl p-4 space-y-3">
-            <h2 className="font-semibold text-stone-900">{t('title')}</h2>
+          <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
+            <h2 className="font-semibold text-[#1e3a5f]">{t('title')}</h2>
             <CartPdfExport />
           </div>
 
           {/* Enquiry form */}
-          <div className="bg-white border border-stone-200 rounded-xl p-4">
+          <div className="bg-white border border-slate-200 rounded-xl p-4">
             <EnquiryForm />
           </div>
         </div>

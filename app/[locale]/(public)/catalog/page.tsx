@@ -63,9 +63,9 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-stone-900 mb-1">{t('title')}</h1>
+        <h1 className="text-2xl font-bold text-[#1e3a5f] mb-1">{t('title')}</h1>
         {total > 0 && (
-          <p className="text-sm text-stone-500">
+          <p className="text-sm text-slate-500">
             {t('showing', { count: total })}
           </p>
         )}
@@ -124,7 +124,7 @@ function Pagination({
   searchParams: Record<string, string | string[] | undefined>
   locale: string
 }) {
-  const base = locale === 'el' ? '/el' : ''
+  const base = locale === 'en' ? '/en' : ''
 
   function buildUrl(p: number) {
     const params = new URLSearchParams()
@@ -146,18 +146,18 @@ function Pagination({
       {page > 1 && (
         <a
           href={buildUrl(page - 1)}
-          className="px-3 py-1.5 text-sm border border-stone-200 rounded-md text-stone-600 hover:bg-stone-50"
+          className="px-3 py-1.5 text-sm border border-slate-200 rounded-md text-slate-600 hover:bg-slate-50"
         >
           Previous
         </a>
       )}
-      <span className="text-sm text-stone-500">
+      <span className="text-sm text-slate-500">
         Page {page} of {totalPages}
       </span>
       {page < totalPages && (
         <a
           href={buildUrl(page + 1)}
-          className="px-3 py-1.5 text-sm border border-stone-200 rounded-md text-stone-600 hover:bg-stone-50"
+          className="px-3 py-1.5 text-sm border border-slate-200 rounded-md text-slate-600 hover:bg-slate-50"
         >
           Next
         </a>

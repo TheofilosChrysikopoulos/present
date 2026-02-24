@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { getTranslations, getLocale } from 'next-intl/server'
 import type { Metadata } from 'next'
@@ -9,7 +10,7 @@ import { getLocalizedField } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 
 export const metadata: Metadata = {
-  title: 'ePresent — Wholesale Tourist Products',
+  title: 'Present Accessories — Wholesale Tourist Products',
 }
 
 export default async function HomePage() {
@@ -21,27 +22,59 @@ export default async function HomePage() {
     getNewArrivals(8),
   ])
 
-  const base = locale === 'el' ? '/el' : ''
+  const base = locale === 'en' ? '/en' : ''
   const tNav = await getTranslations('nav')
 
   return (
     <div>
       {/* Hero */}
-      <section className="bg-stone-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+      <section className="relative overflow-hidden">
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/background2.jpg"
+            alt=""
+            fill
+            className="object-cover"
+            priority
+            quality={85}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#1e3a5f]/90 via-[#1e3a5f]/75 to-[#1e3a5f]/50" />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+            <div className="flex items-center gap-3 mb-6">
+              <Image
+                src="/logo.png"
+                alt="Present Accessories"
+                width={48}
+                height={48}
+                className="rounded-lg"
+              />
+              <span className="text-[#B13D82] text-sm font-semibold tracking-widest uppercase">
+                Present Accessories
+              </span>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight text-white">
               {t('hero.title')}
             </h1>
-            <p className="text-stone-300 text-lg mb-8 leading-relaxed">
+            <p className="text-slate-300 text-lg mb-8 leading-relaxed">
               {t('hero.subtitle')}
             </p>
-            <Button asChild size="lg" variant="secondary" className="gap-2 font-semibold">
-              <Link href={`${base}/catalog`}>
-                {t('hero.cta')}
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button asChild size="lg" className="gap-2 font-semibold bg-[#BFDBFE] hover:bg-[#93C5FD] text-[#1e3a5f] border-0">
+                <Link href={`${base}/catalog`}>
+                  {t('hero.cta')}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="gap-2 font-semibold bg-white/90 border-white text-[#1e3a5f] hover:bg-transparent hover:text-white hover:border-white/60 transition-all">
+                <Link href={`${base}/auth/register`}>
+                  {t('hero.register', { defaultValue: 'Get Started' })}
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>
@@ -50,10 +83,10 @@ export default async function HomePage() {
       {tree.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-stone-900">{t('categories')}</h2>
+            <h2 className="text-xl font-bold text-[#1e3a5f]">{t('categories')}</h2>
             <Link
               href={`${base}/catalog`}
-              className="text-sm text-stone-500 hover:text-stone-800 flex items-center gap-1"
+              className="text-sm text-slate-500 hover:text-[#1e3a5f] flex items-center gap-1"
             >
               {t('viewAll')} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -63,13 +96,13 @@ export default async function HomePage() {
               <Link
                 key={cat.id}
                 href={`${base}/catalog/${cat.slug}`}
-                className="group flex flex-col items-center justify-center p-4 bg-stone-50 border border-stone-200 rounded-xl hover:bg-stone-100 hover:border-stone-300 transition-all text-center"
+                className="group flex flex-col items-center justify-center p-4 bg-white border border-slate-200 rounded-xl hover:border-[#B13D82] hover:shadow-md transition-all text-center"
               >
-                <span className="text-sm font-medium text-stone-700 group-hover:text-stone-900">
+                <span className="text-sm font-medium text-slate-700 group-hover:text-[#1e3a5f]">
                   {getLocalizedField(cat, locale)}
                 </span>
                 {cat.children && cat.children.length > 0 && (
-                  <span className="text-xs text-stone-400 mt-0.5">
+                  <span className="text-xs text-slate-400 mt-0.5">
                     {cat.children.length} subcategories
                   </span>
                 )}
@@ -81,12 +114,12 @@ export default async function HomePage() {
 
       {/* Featured products */}
       {featured.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-stone-100">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-slate-200">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-stone-900">{t('featured')}</h2>
+            <h2 className="text-xl font-bold text-[#1e3a5f]">{t('featured')}</h2>
             <Link
               href={`${base}/catalog?featured=true`}
-              className="text-sm text-stone-500 hover:text-stone-800 flex items-center gap-1"
+              className="text-sm text-slate-500 hover:text-[#1e3a5f] flex items-center gap-1"
             >
               {t('viewAll')} <ArrowRight className="h-3.5 w-3.5" />
             </Link>
@@ -97,12 +130,12 @@ export default async function HomePage() {
 
       {/* New arrivals */}
       {newArrivals.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-stone-100">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 border-t border-slate-200">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-stone-900">{t('newArrivals')}</h2>
+            <h2 className="text-xl font-bold text-[#1e3a5f]">{t('newArrivals')}</h2>
             <Link
               href={`${base}/catalog?new=true`}
-              className="text-sm text-stone-500 hover:text-stone-800 flex items-center gap-1"
+              className="text-sm text-slate-500 hover:text-[#1e3a5f] flex items-center gap-1"
             >
               {t('viewAll')} <ArrowRight className="h-3.5 w-3.5" />
             </Link>

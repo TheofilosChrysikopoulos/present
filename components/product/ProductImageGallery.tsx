@@ -42,7 +42,7 @@ export function ProductImageGallery({
 
   if (!images.length) {
     return (
-      <div className="aspect-square bg-stone-100 rounded-xl flex items-center justify-center text-stone-300">
+      <div className="aspect-square bg-slate-100 rounded-xl flex items-center justify-center text-slate-300">
         <svg
           className="h-24 w-24"
           fill="none"
@@ -63,7 +63,7 @@ export function ProductImageGallery({
   return (
     <div className="space-y-3">
       {/* Main image */}
-      <div className="relative aspect-square rounded-xl overflow-hidden bg-stone-50">
+      <div className="relative aspect-square rounded-xl overflow-hidden bg-white">
         <Image
           src={imgUrl(active.storage_path)}
           alt={
@@ -71,7 +71,7 @@ export function ProductImageGallery({
           }
           fill
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover"
+          className="object-contain p-3"
           priority
         />
       </div>
@@ -86,8 +86,8 @@ export function ProductImageGallery({
               className={cn(
                 'relative h-16 w-16 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all',
                 i === activeIndex
-                  ? 'border-stone-900 opacity-100'
-                  : 'border-stone-200 opacity-70 hover:opacity-100'
+                  ? 'border-[#1e3a5f] opacity-100'
+                  : 'border-slate-200 opacity-70 hover:opacity-100'
               )}
             >
               <Image
@@ -97,7 +97,7 @@ export function ProductImageGallery({
                 }
                 fill
                 sizes="64px"
-                className="object-cover"
+                className="object-contain bg-white p-0.5"
               />
             </button>
           ))}

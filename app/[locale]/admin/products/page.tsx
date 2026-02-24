@@ -16,7 +16,7 @@ export default async function AdminProductsPage({
 }: AdminProductsPageProps) {
   const sp = await searchParams
   const locale = await getLocale()
-  const base = locale === 'el' ? '/el' : ''
+  const base = locale === 'en' ? '/en' : ''
 
   const { products, total, page, totalPages } = await getProducts({
     search: sp.q,

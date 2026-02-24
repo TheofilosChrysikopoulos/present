@@ -51,7 +51,7 @@ export function ProductCard({ product }: ProductCardProps) {
     product.product_images?.[0]
 
   const name = locale === 'el' ? product.name_el : product.name_en
-  const href = locale === 'el' ? `/el/product/${product.sku}` : `/product/${product.sku}`
+  const href = locale === 'en' ? `/en/product/${product.sku}` : `/product/${product.sku}`
 
   // Show up to 4 color swatches
   const swatches = product.product_variants?.slice(0, 4) ?? []
@@ -59,10 +59,10 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       href={href}
-      className="group block bg-white rounded-xl border border-stone-200 overflow-hidden hover:border-stone-300 hover:shadow-md transition-all duration-200"
+      className="group block bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-[#B13D82]/60 hover:shadow-lg transition-all duration-200"
     >
       {/* Image container */}
-      <div className="relative aspect-square bg-stone-50 overflow-hidden">
+      <div className="relative aspect-square bg-white overflow-hidden">
         {primaryImage ? (
           <Image
             src={getImageUrl(primaryImage.storage_path)}
@@ -72,7 +72,7 @@ export function ProductCard({ product }: ProductCardProps) {
             }
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-stone-300">
@@ -95,7 +95,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.is_new_arrival && (
-            <Badge className="bg-stone-900 text-white text-[10px] px-1.5 py-0.5 h-auto">
+            <Badge className="bg-[#1e3a5f] text-white text-[10px] px-1.5 py-0.5 h-auto">
               {ct('newArrival')}
             </Badge>
           )}
@@ -112,15 +112,15 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Info */}
       <div className="p-3">
-        <p className="text-[11px] text-stone-400 font-mono mb-0.5">{product.sku}</p>
-        <h3 className="text-sm font-medium text-stone-900 line-clamp-2 leading-snug">
+        <p className="text-[11px] text-slate-400 font-mono mb-0.5">{product.sku}</p>
+        <h3 className="text-sm font-medium text-[#1e3a5f] line-clamp-2 leading-snug">
           {name}
         </h3>
 
         <div className="mt-2 flex items-center justify-between gap-2">
           <PriceBadge price={product.price} size="sm" />
           {product.moq > 1 && (
-            <span className="text-[11px] text-stone-400">
+            <span className="text-[11px] text-slate-400">
               {t('moqNote', { moq: product.moq })}
             </span>
           )}
@@ -132,13 +132,13 @@ export function ProductCard({ product }: ProductCardProps) {
             {swatches.map((v) => (
               <span
                 key={v.id}
-                className="h-3.5 w-3.5 rounded-full border border-stone-200 flex-shrink-0"
+                className="h-3.5 w-3.5 rounded-full border border-slate-200 flex-shrink-0"
                 style={{ backgroundColor: v.hex_color ?? '#e7e5e4' }}
                 title={locale === 'el' ? v.color_name_el : v.color_name_en}
               />
             ))}
             {(product.product_variants?.length ?? 0) > 4 && (
-              <span className="text-[10px] text-stone-400">
+              <span className="text-[10px] text-slate-400">
                 +{(product.product_variants?.length ?? 0) - 4}
               </span>
             )}

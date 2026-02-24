@@ -16,7 +16,7 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const base = locale === 'el' ? '/el' : ''
+  const base = locale === 'en' ? '/en' : ''
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -105,7 +105,7 @@ export default function AdminLoginPage() {
               </p>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full bg-[#BFDBFE] hover:bg-[#93C5FD] text-[#1e3a5f] border-0" disabled={loading}>
               {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>

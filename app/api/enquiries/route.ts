@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { sendOrderNotification } from '@/lib/email/mailer'
 
 const enquirySchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  company: z.string().optional(),
-  phone: z.string().optional(),
   message: z.string().optional(),
   cart_snapshot: z.array(
     z.object({
@@ -19,6 +17,9 @@ const enquirySchema = z.object({
       variant_id: z.string().optional(),
       variant_color_en: z.string().optional(),
       variant_color_el: z.string().optional(),
+      size_id: z.string().optional(),
+      size_label_en: z.string().optional(),
+      size_label_el: z.string().optional(),
     })
   ),
 })
@@ -36,9 +37,41 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = await createClient()
-    const { data, error } = await supabase
+
+    // User must be logged in to place an order
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session) {
+      return NextResponse.json({ error: 'You must be logged in to place an order.' }, { status: 401 })
+    }
+
+    // Get customer record via admin client
+    const adminClient = createAdminClient()
+    const { data: customer } = await adminClient
+      .from('customers')
+      .select('id, first_name, last_name, email, location')
+      .eq('auth_user_id', session.user.id)
+      .maybeSingle()
+
+    if (!customer) {
+      return NextResponse.json({ error: 'Customer account not found.' }, { status: 404 })
+    }
+
+    const customerName = `${customer.first_name} ${customer.last_name}`
+
+    // Insert enquiry with customer info auto-filled
+    const { data, error } = await adminClient
       .from('enquiries')
-      .insert(parsed.data)
+      .insert({
+        name: customerName,
+        email: customer.email,
+        company: customer.location,
+        message: parsed.data.message || null,
+        cart_snapshot: parsed.data.cart_snapshot,
+        customer_id: customer.id,
+      })
       .select('id')
       .single()
 
@@ -46,6 +79,29 @@ export async function POST(request: NextRequest) {
       console.error('Enquiry insert error:', error)
       return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
+
+    // Also create an order record
+    const totalAmount = parsed.data.cart_snapshot.reduce(
+      (sum, item) => sum + item.price * item.qty,
+      0
+    )
+
+    await adminClient.from('orders').insert({
+      customer_id: customer.id,
+      enquiry_id: data.id,
+      items: parsed.data.cart_snapshot,
+      total_amount: totalAmount,
+    })
+
+    // Send order notification email to admin
+    sendOrderNotification({
+      customerName,
+      customerEmail: customer.email,
+      customerLocation: customer.location,
+      message: parsed.data.message,
+      items: parsed.data.cart_snapshot,
+      totalAmount,
+    }).catch((e) => console.error('Failed to send order notification email:', e))
 
     return NextResponse.json({ id: data.id }, { status: 201 })
   } catch (err) {

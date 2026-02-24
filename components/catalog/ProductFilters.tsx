@@ -22,7 +22,7 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const base = locale === 'el' ? '/el' : ''
+  const base = locale === 'en' ? '/en' : ''
 
   const hasFilters =
     searchParams.has('q') ||
@@ -54,13 +54,13 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
   return (
     <aside className="w-full">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-stone-900">{t('filters')}</h2>
+        <h2 className="font-semibold text-[#1e3a5f]">{t('filters')}</h2>
         {hasFilters && (
           <Button
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="text-stone-500 text-xs h-7 px-2 gap-1"
+            className="text-slate-500 text-xs h-7 px-2 gap-1"
           >
             <X className="h-3 w-3" />
             {t('clearFilters')}
@@ -70,7 +70,7 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
 
       {/* Categories */}
       <div className="mb-5">
-        <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+        <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
           {t('categories')}
         </h3>
         <div className="space-y-0.5">
@@ -79,8 +79,8 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
             className={cn(
               'flex items-center px-2 py-1.5 rounded-md text-sm transition-colors',
               !currentCategorySlug
-                ? 'bg-stone-900 text-white'
-                : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+                ? 'bg-[#1e3a5f] text-white'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-[#1e3a5f]'
             )}
           >
             {t('allCategories')}
@@ -103,7 +103,7 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
       {/* Active tag filters */}
       {activeTags.length > 0 && (
         <div className="mb-4">
-          <h3 className="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-2">
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
             Active Tags
           </h3>
           <div className="flex flex-wrap gap-1.5">
@@ -111,7 +111,7 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
               <button
                 key={tag}
                 onClick={() => toggleTag(tag)}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-stone-900 text-white text-xs font-medium"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[#1e3a5f] text-white text-xs font-medium"
               >
                 {tag}
                 <X className="h-3 w-3" />
@@ -147,8 +147,8 @@ function CategoryFilterItem({
         className={cn(
           'flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-colors',
           isActive
-            ? 'bg-stone-900 text-white'
-            : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
+            ? 'bg-[#1e3a5f] text-white'
+            : 'text-slate-600 hover:bg-slate-100 hover:text-[#1e3a5f]'
         )}
       >
         <span>{getLocalizedField(cat, locale)}</span>

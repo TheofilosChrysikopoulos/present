@@ -54,15 +54,15 @@ export function ProductDetail({ product }: ProductDetailProps) {
         }))
       : (product.product_images ?? [])
 
-  const base = locale === 'el' ? '/el' : ''
+  const base = locale === 'en' ? '/en' : ''
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-stone-500 mb-6">
-        <Link href={`${base}/`} className="hover:text-stone-800">{ct('back')}</Link>
+      <nav className="flex items-center gap-2 text-sm text-slate-500 mb-6">
+        <Link href={`${base}/`} className="hover:text-[#1e3a5f]">{ct('back')}</Link>
         <span>/</span>
-        <Link href={`${base}/catalog`} className="hover:text-stone-800">
+        <Link href={`${base}/catalog`} className="hover:text-[#1e3a5f]">
           Catalog
         </Link>
         {product.categories && (
@@ -70,14 +70,14 @@ export function ProductDetail({ product }: ProductDetailProps) {
             <span>/</span>
             <Link
               href={`${base}/catalog/${product.categories.slug}`}
-              className="hover:text-stone-800"
+              className="hover:text-[#1e3a5f]"
             >
               {getLocalizedField(product.categories, locale)}
             </Link>
           </>
         )}
         <span>/</span>
-        <span className="text-stone-900 font-medium truncate max-w-48">{name}</span>
+        <span className="text-[#1e3a5f] font-medium truncate max-w-48">{name}</span>
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
@@ -95,7 +95,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           {/* Badges */}
           <div className="flex gap-2 mb-3">
             {product.is_new_arrival && (
-              <Badge className="bg-stone-900 text-white text-xs">
+              <Badge className="bg-[#1e3a5f] text-white text-xs">
                 {ct('newArrival')}
               </Badge>
             )}
@@ -106,8 +106,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
             )}
           </div>
 
-          <h1 className="text-2xl font-bold text-stone-900 mb-1">{name}</h1>
-          <p className="text-sm text-stone-400 font-mono mb-4">
+          <h1 className="text-2xl font-bold text-[#1e3a5f] mb-1">{name}</h1>
+          <p className="text-sm text-slate-400 font-mono mb-4">
             {t('sku')}: {product.sku}
             {selectedVariant?.sku_suffix && selectedVariant.sku_suffix}
           </p>
@@ -116,7 +116,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           <div className="flex items-baseline gap-3 mb-4">
             <PriceBadge price={product.price} size="lg" />
             {product.moq > 1 && (
-              <span className="text-sm text-stone-500">
+              <span className="text-sm text-slate-500">
                 {t('moqNote', { moq: product.moq })}
               </span>
             )}
@@ -125,10 +125,10 @@ export function ProductDetail({ product }: ProductDetailProps) {
           {/* Category */}
           {product.categories && (
             <div className="flex items-center gap-2 mb-4 text-sm">
-              <span className="text-stone-500">{t('category')}:</span>
+              <span className="text-slate-500">{t('category')}:</span>
               <Link
                 href={`${base}/catalog/${product.categories.slug}`}
-                className="text-stone-700 hover:text-stone-900 font-medium"
+                className="text-slate-700 hover:text-[#1e3a5f] font-medium"
               >
                 {getLocalizedField(product.categories, locale)}
               </Link>
@@ -180,10 +180,10 @@ export function ProductDetail({ product }: ProductDetailProps) {
             <>
               <Separator className="my-6" />
               <div>
-                <h2 className="text-sm font-semibold text-stone-700 mb-2">
+                <h2 className="text-sm font-semibold text-slate-700 mb-2">
                   {t('description')}
                 </h2>
-                <p className="text-sm text-stone-600 leading-relaxed whitespace-pre-wrap">
+                <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">
                   {description}
                 </p>
               </div>

@@ -9,7 +9,7 @@ interface AdminEnquiriesPageProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  new: 'bg-orange-100 text-orange-700',
+  new: 'bg-purple-100 text-[#B13D82]',
   read: 'bg-blue-100 text-blue-700',
   replied: 'bg-green-100 text-green-700',
   archived: 'bg-stone-100 text-stone-500',
@@ -20,7 +20,7 @@ export default async function AdminEnquiriesPage({
 }: AdminEnquiriesPageProps) {
   const sp = await searchParams
   const locale = await getLocale()
-  const base = locale === 'el' ? '/el' : ''
+  const base = locale === 'en' ? '/en' : ''
 
   const validStatuses = ['new', 'read', 'replied', 'archived'] as const
   const statusFilter = validStatuses.includes(

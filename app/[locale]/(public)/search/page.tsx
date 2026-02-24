@@ -34,7 +34,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       </div>
 
       {sp.q && (
-        <p className="text-sm text-stone-500 mb-6">
+        <p className="text-sm text-slate-500 mb-6">
           {total > 0
             ? `${total} results for "${sp.q}"`
             : `No results for "${sp.q}"`}

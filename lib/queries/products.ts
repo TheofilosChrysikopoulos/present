@@ -31,6 +31,8 @@ export interface ProductFilters {
   limit?: number
   sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'name'
   adminView?: boolean // show inactive products in admin
+  /** Filter by product region — pass the customer's region to filter visibility */
+  customerRegion?: 'corfu' | 'greece' | null
 }
 
 export async function getProducts(filters: ProductFilters = {}) {
@@ -47,6 +49,7 @@ export async function getProducts(filters: ProductFilters = {}) {
     limit = 24,
     sortBy = 'newest',
     adminView = false,
+    customerRegion = null,
   } = filters
 
   let query = supabase.from('products').select(
@@ -60,6 +63,11 @@ export async function getProducts(filters: ProductFilters = {}) {
   // Public: only active products
   if (!adminView) {
     query = query.eq('is_active', true)
+  }
+
+  // Region filtering: show 'all' products plus products matching user's region
+  if (!adminView && customerRegion) {
+    query = query.in('region', ['all', customerRegion])
   }
 
   if (search) {

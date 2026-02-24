@@ -1,11 +1,13 @@
 import { getAdminProductStats } from '@/lib/queries/products'
 import { getEnquiryStats } from '@/lib/queries/enquiries'
-import { Package, BarChart3, Mail, AlertCircle } from 'lucide-react'
+import { getCustomerStats } from '@/lib/queries/customers'
+import { Package, BarChart3, Mail, AlertCircle, Users, UserCheck } from 'lucide-react'
 
 export default async function AdminDashboard() {
-  const [productStats, enquiryStats] = await Promise.all([
+  const [productStats, enquiryStats, customerStats] = await Promise.all([
     getAdminProductStats(),
     getEnquiryStats(),
+    getCustomerStats(),
   ])
 
   const stats = [
@@ -31,14 +33,26 @@ export default async function AdminDashboard() {
       label: 'New Enquiries',
       value: enquiryStats.new,
       icon: AlertCircle,
-      color: 'text-orange-600',
+      color: 'text-[#B13D82]',
+    },
+    {
+      label: 'Registered Users',
+      value: customerStats.total,
+      icon: Users,
+      color: 'text-indigo-600',
+    },
+    {
+      label: 'Pending Approvals',
+      value: customerStats.pending,
+      icon: UserCheck,
+      color: 'text-yellow-600',
     },
   ]
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-stone-900 mb-6">Dashboard</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {stats.map((stat) => (
           <div
             key={stat.label}

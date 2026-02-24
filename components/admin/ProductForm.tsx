@@ -37,6 +37,7 @@ const productSchema = z.object({
   moq: z.string().min(1, 'MOQ required'),
   category_id: z.string().optional(),
   tags: z.string().optional(),
+  region: z.enum(['all', 'corfu', 'greece']),
   is_featured: z.boolean(),
   is_new_arrival: z.boolean(),
   is_active: z.boolean(),
@@ -52,7 +53,7 @@ interface ProductFormProps {
 export function ProductForm({ product, categories }: ProductFormProps) {
   const locale = useLocale()
   const router = useRouter()
-  const base = locale === 'el' ? '/el' : ''
+  const base = locale === 'en' ? '/en' : ''
 
   const [images, setImages] = useState<UploadedImage[]>(
     product?.product_images?.map((img) => ({
@@ -107,6 +108,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       moq: product?.moq?.toString() ?? '1',
       category_id: product?.category_id ?? '',
       tags: product?.tags?.join(', ') ?? '',
+      region: product?.region ?? 'all',
       is_featured: product?.is_featured ?? false,
       is_new_arrival: product?.is_new_arrival ?? false,
       is_active: product?.is_active ?? true,
@@ -133,6 +135,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         tags: values.tags
           ? values.tags.split(',').map((t) => t.trim()).filter(Boolean)
           : [],
+        region: values.region,
         is_featured: values.is_featured,
         is_new_arrival: values.is_new_arrival,
         is_active: values.is_active,
@@ -436,6 +439,27 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                     <FormControl>
                       <Input placeholder="ceramic, hand-painted, souvenir" {...field} />
                     </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="region"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Region Visibility</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select region" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="all">All Users</SelectItem>
+                        <SelectItem value="corfu">Corfu Only</SelectItem>
+                        <SelectItem value="greece">Greece Only</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormItem>
                 )}
               />

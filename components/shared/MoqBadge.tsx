@@ -14,7 +14,7 @@ export function MoqBadge({ moq, className }: MoqBadgeProps) {
   return (
     <span
       className={cn(
-        'text-xs text-stone-500 font-medium',
+        'text-xs text-slate-500 font-medium',
         className
       )}
     >

@@ -15,7 +15,7 @@ export function MobileNav({ tree }: { tree: CategoryWithChildren[] }) {
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden h-9 w-9"
+        className="lg:hidden h-9 w-9 text-[#1e3a5f]/70 hover:text-[#1e3a5f] hover:bg-[#1e3a5f]/10"
         onClick={() => setOpen(true)}
         aria-label="Open menu"
       >
@@ -25,8 +25,8 @@ export function MobileNav({ tree }: { tree: CategoryWithChildren[] }) {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="w-72 pt-6">
           <SheetHeader className="mb-4">
-            <SheetTitle className="font-bold text-lg text-stone-900">
-              ePresent
+            <SheetTitle className="font-bold text-lg text-[#1e3a5f]">
+              Present<span className="text-[#B13D82]">.</span>
             </SheetTitle>
           </SheetHeader>
           <CategoryMenu

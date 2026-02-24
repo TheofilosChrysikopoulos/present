@@ -8,25 +8,19 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from '@/components/ui/form'
 import { useCart } from '@/hooks/useCart'
+import { useUser } from '@/hooks/useUser'
 import type { EnquiryCartItem } from '@/lib/types'
 
 const enquirySchema = z.object({
-  name: z.string().min(2, 'Name is required'),
-  email: z.string().email('Valid email required'),
-  company: z.string().optional(),
-  phone: z.string().optional(),
   message: z.string().optional(),
 })
 
@@ -35,20 +29,19 @@ type EnquiryFormValues = z.infer<typeof enquirySchema>
 export function EnquiryForm() {
   const t = useTranslations('enquiry')
   const { items, clearCart } = useCart()
+  const { customer } = useUser()
   const [submitted, setSubmitted] = useState(false)
 
   const form = useForm<EnquiryFormValues>({
     resolver: zodResolver(enquirySchema),
     defaultValues: {
-      name: '',
-      email: '',
-      company: '',
-      phone: '',
       message: '',
     },
   })
 
   async function onSubmit(values: EnquiryFormValues) {
+    if (!customer) return
+
     const cartSnapshot: EnquiryCartItem[] = items.map((item) => ({
       product_id: item.productId,
       sku: item.sku,
@@ -68,7 +61,10 @@ export function EnquiryForm() {
       const res = await fetch('/api/enquiries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...values, cart_snapshot: cartSnapshot }),
+        body: JSON.stringify({
+          message: values.message,
+          cart_snapshot: cartSnapshot,
+        }),
       })
 
       if (!res.ok) {
@@ -78,8 +74,7 @@ export function EnquiryForm() {
 
       setSubmitted(true)
       toast.success(t('success'))
-      // Don't auto-clear cart — let user decide
-    } catch (err) {
+    } catch {
       toast.error(t('error'))
     }
   }
@@ -90,12 +85,15 @@ export function EnquiryForm() {
         <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
           <Send className="h-5 w-5 text-green-600" />
         </div>
-        <p className="text-sm text-stone-700 font-medium">{t('success')}</p>
+        <p className="text-sm text-slate-700 font-medium">{t('success')}</p>
         <button
-          onClick={() => setSubmitted(false)}
-          className="mt-3 text-xs text-stone-400 hover:text-stone-600 underline"
+          onClick={() => {
+            setSubmitted(false)
+            clearCart()
+          }}
+          className="mt-3 text-xs text-slate-400 hover:text-slate-600 underline"
         >
-          Send another enquiry
+          {t('continueShopping')}
         </button>
       </div>
     )
@@ -104,82 +102,19 @@ export function EnquiryForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-        <h2 className="font-semibold text-stone-900 mb-1">{t('title')}</h2>
-        <p className="text-xs text-stone-500 mb-3">{t('subtitle')}</p>
+        <h2 className="font-semibold text-[#1e3a5f] mb-1">{t('title')}</h2>
+        <p className="text-xs text-slate-500 mb-3">{t('subtitle')}</p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">{t('name')} *</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={t('namePlaceholder')}
-                    className="h-8 text-sm"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">{t('email')} *</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder={t('emailPlaceholder')}
-                    className="h-8 text-sm"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <FormField
-            control={form.control}
-            name="company"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">{t('company')}</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={t('companyPlaceholder')}
-                    className="h-8 text-sm"
-                    {...field}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-xs">{t('phone')}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="tel"
-                    placeholder={t('phonePlaceholder')}
-                    className="h-8 text-sm"
-                    {...field}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-        </div>
+        {/* Show logged-in user info */}
+        {customer && (
+          <div className="bg-slate-50 rounded-lg px-3 py-2 text-sm text-slate-600 space-y-0.5">
+            <p className="font-medium text-slate-800">
+              {customer.first_name} {customer.last_name}
+            </p>
+            <p className="text-xs">{customer.email}</p>
+            <p className="text-xs">{customer.location}</p>
+          </div>
+        )}
 
         <FormField
           control={form.control}
@@ -199,7 +134,7 @@ export function EnquiryForm() {
           )}
         />
 
-        <p className="text-xs text-stone-400">
+        <p className="text-xs text-slate-400">
           {t('cartSummary', { count: items.length })}
         </p>
 

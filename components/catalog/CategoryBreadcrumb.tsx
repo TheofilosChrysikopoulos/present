@@ -21,7 +21,7 @@ export async function CategoryBreadcrumb({
   ancestors,
 }: CategoryBreadcrumbProps) {
   const [locale, t] = await Promise.all([getLocale(), getTranslations('nav')])
-  const base = locale === 'el' ? '/el' : ''
+  const base = locale === 'en' ? '/en' : ''
 
   return (
     <Breadcrumb>

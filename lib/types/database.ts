@@ -35,6 +35,7 @@ export interface Product {
   moq: number
   category_id: string | null
   tags: string[]
+  region: 'all' | 'corfu' | 'greece'
   is_featured: boolean
   is_new_arrival: boolean
   is_active: boolean
@@ -129,4 +130,42 @@ export interface ProductVariantWithImages extends ProductVariant {
 export interface ProductListItem extends Product {
   primary_image: ProductImage | null
   category: Category | null
+}
+
+// Customer / user registration types
+export interface Customer {
+  id: string
+  email: string
+  first_name: string
+  last_name: string
+  location: string
+  region: 'corfu' | 'greece'
+  status: 'pending' | 'approved' | 'rejected'
+  auth_user_id: string | null
+  device_verified: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface CustomerWithStats extends Customer {
+  total_orders: number
+  total_spent: number
+  last_order_at: string | null
+}
+
+export interface Order {
+  id: string
+  customer_id: string
+  enquiry_id: string | null
+  order_number: number
+  items: EnquiryCartItem[]
+  total_amount: number
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'completed' | 'cancelled'
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface OrderWithCustomer extends Order {
+  customer: Customer
 }

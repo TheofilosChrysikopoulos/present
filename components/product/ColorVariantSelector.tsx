@@ -31,7 +31,7 @@ export function ColorVariantSelector({
 
   return (
     <div>
-      <p className="text-sm font-medium text-stone-700 mb-2">{t('colors')}</p>
+      <p className="text-sm font-medium text-slate-700 mb-2">{t('colors')}</p>
       <div className="flex items-center gap-2 flex-wrap">
         {/* "No variant" option to reset to base product */}
         {sorted.map((variant) => {
@@ -51,8 +51,8 @@ export function ColorVariantSelector({
                 className={cn(
                   'relative h-12 w-12 rounded-lg overflow-hidden border-2 transition-all',
                   isSelected
-                    ? 'border-stone-900 shadow-md'
-                    : 'border-stone-200 hover:border-stone-400'
+                    ? 'border-[#1e3a5f] shadow-md'
+                    : 'border-slate-200 hover:border-slate-400'
                 )}
               >
                 <Image
@@ -60,7 +60,7 @@ export function ColorVariantSelector({
                   alt={colorName}
                   fill
                   sizes="48px"
-                  className="object-cover"
+                  className="object-contain bg-white p-0.5"
                 />
               </button>
             )
@@ -75,8 +75,8 @@ export function ColorVariantSelector({
               className={cn(
                 'h-8 w-8 rounded-full border-2 transition-all flex-shrink-0',
                 isSelected
-                  ? 'border-stone-900 scale-110 shadow-md'
-                  : 'border-stone-200 hover:border-stone-400 hover:scale-105'
+                  ? 'border-[#1e3a5f] scale-110 shadow-md'
+                  : 'border-slate-200 hover:border-slate-400 hover:scale-105'
               )}
               style={{ backgroundColor: variant.hex_color ?? '#e7e5e4' }}
               aria-pressed={isSelected}
@@ -87,7 +87,7 @@ export function ColorVariantSelector({
       </div>
 
       {selectedVariantId && (
-        <p className="mt-1.5 text-xs text-stone-500">
+        <p className="mt-1.5 text-xs text-slate-500">
           {sorted.find((v) => v.id === selectedVariantId)
             ? locale === 'el'
               ? sorted.find((v) => v.id === selectedVariantId)!.color_name_el

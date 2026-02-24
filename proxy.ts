@@ -8,10 +8,15 @@ const intlMiddleware = createIntlMiddleware(routing)
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // Skip middleware for API routes and static assets — they don't need locale rewriting
+  if (pathname.startsWith('/api') || pathname.startsWith('/fonts') || pathname.startsWith('/images') || pathname.includes('.')) {
+    return NextResponse.next()
+  }
+
   // Run next-intl middleware for locale routing
   const intlResponse = intlMiddleware(request)
 
-  // Determine the locale from the pathname (default to 'en')
+  // Determine the locale from the pathname (default to 'el')
   const localeMatch = pathname.match(/^\/(en|el)(\/|$)/)
   const locale = localeMatch ? localeMatch[1] : routing.defaultLocale
 

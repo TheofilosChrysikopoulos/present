@@ -1,20 +1,54 @@
 import type { CartItem } from '@/lib/cart/cartTypes'
 
+// Track whether Roboto has been registered
+let robotoRegistered = false
+
 export async function generateCartPdf(
   items: CartItem[],
   locale: string
 ): Promise<Blob> {
   // Dynamically import @react-pdf/renderer to keep it client-only
-  const { pdf, Document, Page, Text, View, StyleSheet } = await import(
+  const { pdf, Document, Page, Text, View, StyleSheet, Font } = await import(
     '@react-pdf/renderer'
   )
 
   const isEl = locale === 'el'
+
+  // Register Roboto font only once, using ArrayBuffer to avoid fontkit parsing issues
+  if (!robotoRegistered) {
+    try {
+      const base = window.location.origin
+      const [regularBuf, boldBuf] = await Promise.all([
+        fetch(`${base}/fonts/Roboto-Regular.ttf`).then((r) => r.arrayBuffer()),
+        fetch(`${base}/fonts/Roboto-Bold.ttf`).then((r) => r.arrayBuffer()),
+      ])
+
+      // Convert to base64 data URLs — this uses a simpler code path in fontkit
+      const toDataUrl = (buf: ArrayBuffer) => {
+        const bytes = new Uint8Array(buf)
+        let binary = ''
+        for (let i = 0; i < bytes.length; i++) {
+          binary += String.fromCharCode(bytes[i])
+        }
+        return `data:font/truetype;base64,${btoa(binary)}`
+      }
+
+      // Register as two separate families to match Helvetica/Helvetica-Bold pattern
+      Font.register({ family: 'Roboto', src: toDataUrl(regularBuf) })
+      Font.register({ family: 'Roboto-Bold', src: toDataUrl(boldBuf) })
+      robotoRegistered = true
+    } catch (e) {
+      console.warn('Failed to load Roboto font, falling back to Helvetica', e)
+    }
+  }
+
+  const fontFamily = robotoRegistered ? 'Roboto' : 'Helvetica'
+  const fontFamilyBold = robotoRegistered ? 'Roboto-Bold' : 'Helvetica-Bold'
   const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0)
 
   const styles = StyleSheet.create({
     page: {
-      fontFamily: 'Helvetica',
+      fontFamily: fontFamily,
       fontSize: 10,
       padding: 40,
       color: '#1c1917',
@@ -27,7 +61,7 @@ export async function generateCartPdf(
     },
     logo: {
       fontSize: 20,
-      fontFamily: 'Helvetica-Bold',
+      fontFamily: fontFamilyBold,
       marginBottom: 4,
     },
     subtitle: {
@@ -41,7 +75,7 @@ export async function generateCartPdf(
     },
     sectionTitle: {
       fontSize: 11,
-      fontFamily: 'Helvetica-Bold',
+      fontFamily: fontFamilyBold,
       marginBottom: 8,
     },
     tableHeader: {
@@ -63,7 +97,7 @@ export async function generateCartPdf(
     colSize: { width: '14%' },
     colQty: { width: '10%', textAlign: 'right' },
     colPrice: { width: '14%', textAlign: 'right' },
-    headerText: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#78716c' },
+    headerText: { fontSize: 9, fontFamily: fontFamilyBold, color: '#78716c' },
     cellText: { fontSize: 9 },
     totalRow: {
       flexDirection: 'row',
@@ -75,12 +109,12 @@ export async function generateCartPdf(
     },
     totalLabel: {
       fontSize: 10,
-      fontFamily: 'Helvetica-Bold',
+      fontFamily: fontFamilyBold,
       marginRight: 12,
     },
     totalAmount: {
       fontSize: 12,
-      fontFamily: 'Helvetica-Bold',
+      fontFamily: fontFamilyBold,
     },
     note: {
       marginTop: 28,

@@ -24,11 +24,11 @@ export function EmptyState({
       )}
     >
       {icon && (
-        <div className="mb-4 text-stone-300">{icon}</div>
+        <div className="mb-4 text-slate-300">{icon}</div>
       )}
-      <h3 className="text-lg font-medium text-stone-700">{title}</h3>
+      <h3 className="text-lg font-medium text-slate-700">{title}</h3>
       {description && (
-        <p className="mt-1 text-sm text-stone-500 max-w-xs">{description}</p>
+        <p className="mt-1 text-sm text-slate-500 max-w-xs">{description}</p>
       )}
       {action && <div className="mt-6">{action}</div>}
     </div>

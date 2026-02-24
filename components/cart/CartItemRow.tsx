@@ -44,18 +44,18 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
   return (
     <div className={cn('flex gap-3', compact ? 'py-2' : 'py-4')}>
       {/* Image */}
-      <div className={cn('relative flex-shrink-0 rounded-lg overflow-hidden bg-stone-100',
-        compact ? 'h-14 w-14' : 'h-20 w-20')}>
+      <div className={cn('relative flex-shrink-0 rounded-lg overflow-hidden bg-white border border-slate-100',
+      compact ? 'h-14 w-14' : 'h-20 w-20')}>
         {item.primaryImagePath ? (
           <Image
             src={imgUrl(item.primaryImagePath)}
             alt={name}
             fill
             sizes={compact ? '56px' : '80px'}
-            className="object-cover"
+            className="object-contain p-1"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-stone-300">
+          <div className="absolute inset-0 flex items-center justify-center text-slate-300">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
@@ -68,31 +68,31 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="text-sm font-medium text-stone-900 line-clamp-2 leading-snug">
+            <p className="text-sm font-medium text-[#1e3a5f] line-clamp-2 leading-snug">
               {name}
             </p>
-            <p className="text-xs text-stone-400 font-mono mt-0.5">{item.sku}</p>
+            <p className="text-xs text-slate-400 font-mono mt-0.5">{item.sku}</p>
             {colorName && (
               <div className="flex items-center gap-1.5 mt-1">
                 {item.variant?.hexColor && (
                   <span
-                    className="h-3 w-3 rounded-full border border-stone-200 flex-shrink-0"
+                    className="h-3 w-3 rounded-full border border-slate-200 flex-shrink-0"
                     style={{ backgroundColor: item.variant.hexColor }}
                   />
                 )}
-                <span className="text-xs text-stone-500">{colorName}</span>
+                <span className="text-xs text-slate-500">{colorName}</span>
               </div>
             )}
             {sizeName && (
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-xs text-stone-500">{sizeName}</span>
+                <span className="text-xs text-slate-500">{sizeName}</span>
               </div>
             )}
           </div>
 
           <button
             onClick={() => removeItem(item.id)}
-            className="flex-shrink-0 text-stone-400 hover:text-stone-600 transition-colors"
+            className="flex-shrink-0 text-slate-400 hover:text-slate-600 transition-colors"
             aria-label={t('remove')}
           >
             <X className={cn(compact ? 'h-3.5 w-3.5' : 'h-4 w-4')} />
@@ -105,7 +105,7 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => updateQty(item.id, item.qty - 1)}
-                className="h-7 w-7 rounded border border-stone-200 flex items-center justify-center text-stone-600 hover:bg-stone-50"
+                className="h-7 w-7 rounded border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50"
                 aria-label="Decrease"
               >
                 <Minus className="h-3 w-3" />
@@ -113,13 +113,13 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
               <span className="w-8 text-center text-sm font-medium">{item.qty}</span>
               <button
                 onClick={() => updateQty(item.id, item.qty + 1)}
-                className="h-7 w-7 rounded border border-stone-200 flex items-center justify-center text-stone-600 hover:bg-stone-50"
+                className="h-7 w-7 rounded border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50"
                 aria-label="Increase"
               >
                 <Plus className="h-3 w-3" />
               </button>
               {item.moq > 1 && (
-                <span className="text-xs text-stone-400 ml-1">min {item.moq}</span>
+                <span className="text-xs text-slate-400 ml-1">min {item.moq}</span>
               )}
             </div>
 
@@ -128,7 +128,7 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
         )}
 
         {compact && (
-          <p className="text-xs text-stone-500 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             {t('qty')}: {item.qty} × <PriceBadge price={item.price} size="sm" />
           </p>
         )}

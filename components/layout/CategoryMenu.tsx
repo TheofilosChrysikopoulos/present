@@ -28,7 +28,7 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
   }
 
   function getCategoryHref(slug: string) {
-    const base = locale === 'el' ? '/el' : ''
+    const base = locale === 'en' ? '/en' : ''
     return `${base}/catalog/${slug}`
   }
 
@@ -40,7 +40,7 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
     return (
       <nav className="flex flex-col gap-1">
         <Link
-          href={locale === 'el' ? '/el/catalog' : '/catalog'}
+          href={locale === 'en' ? '/en/catalog' : '/catalog'}
           className="px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 rounded-md"
           onClick={onClose}
         >
@@ -65,12 +65,12 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
   return (
     <nav className="hidden lg:flex items-center gap-1">
       <Link
-        href={locale === 'el' ? '/el/catalog' : '/catalog'}
+        href={locale === 'en' ? '/en/catalog' : '/catalog'}
         className={cn(
           'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
           pathname.endsWith('/catalog') || pathname.endsWith('/catalog/')
-            ? 'text-stone-900 bg-stone-100'
-            : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+            ? 'text-[#1e3a5f] bg-[#1e3a5f]/10'
+            : 'text-[#1e3a5f]/70 hover:text-[#1e3a5f] hover:bg-[#1e3a5f]/10'
         )}
       >
         {t('allProducts')}
@@ -113,8 +113,8 @@ function DesktopCategoryItem({
         className={cn(
           'flex items-center gap-0.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
           isActive(cat.slug)
-            ? 'text-stone-900 bg-stone-100'
-            : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+            ? 'text-[#1e3a5f] bg-[#1e3a5f]/10'
+            : 'text-[#1e3a5f]/70 hover:text-[#1e3a5f] hover:bg-[#1e3a5f]/10'
         )}
       >
         {getLocalizedField(cat, locale)}

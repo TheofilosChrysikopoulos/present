@@ -5,6 +5,7 @@ import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import { CartProvider } from '@/lib/cart/cartContext'
+import { UserProvider } from '@/lib/auth/userContext'
 import { Toaster } from '@/components/ui/sonner'
 import '@/app/globals.css'
 
@@ -20,11 +21,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | ePresent Wholesale',
-    default: 'ePresent — Wholesale Tourist Products',
+    template: '%s | Present Accessories',
+    default: 'Present Accessories — Wholesale Tourist Products',
   },
   description:
-    'Quality tourist and souvenir products for retailers and distributors.',
+    'Quality tourist and souvenir products for retailers and distributors. Based in Corfu, Greece.',
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
 }
 
 export default async function LocaleLayout({
@@ -45,13 +50,15 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-white`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >
         <NextIntlClientProvider messages={messages}>
-          <CartProvider>
-            {children}
-            <Toaster richColors position="bottom-right" />
-          </CartProvider>
+          <UserProvider>
+            <CartProvider>
+              {children}
+              <Toaster richColors position="bottom-right" />
+            </CartProvider>
+          </UserProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useTranslations, useLocale } from 'next-intl'
-import { ShoppingCart, Check, Minus, Plus } from 'lucide-react'
+import { ShoppingCart, Check, Minus, Plus, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useCart } from '@/hooks/useCart'
+import { useUser } from '@/hooks/useUser'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { ProductVariantWithImages, ProductSize } from '@/lib/types'
@@ -36,10 +38,37 @@ export function AddToCartButton({
   selectedSize,
 }: AddToCartButtonProps) {
   const t = useTranslations('product')
+  const tAuth = useTranslations('auth')
   const locale = useLocale()
+  const base = locale === 'en' ? '/en' : ''
   const { addItem, isInCart, getItemQty } = useCart()
+  const { isApproved, isAuthenticated, loading: userLoading } = useUser()
   const [qty, setQty] = useState(product.moq)
   const [justAdded, setJustAdded] = useState(false)
+
+  // If user is not approved, show login/register prompt
+  if (!userLoading && !isApproved) {
+    return (
+      <div className="space-y-3">
+        <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
+          <Lock className="h-5 w-5 text-slate-400 mx-auto mb-2" />
+          <p className="text-sm text-slate-600 mb-3">
+            {isAuthenticated ? tAuth('pendingApproval') : tAuth('loginToOrder')}
+          </p>
+          {!isAuthenticated && (
+            <div className="flex gap-2 justify-center">
+              <Button asChild size="sm" variant="outline">
+                <Link href={`${base}/auth/login`}>{tAuth('loginLink')}</Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href={`${base}/auth/register`}>{tAuth('registerLink')}</Link>
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   const variantId = selectedVariant?.id
   const sizeId = selectedSize?.id
@@ -106,13 +135,13 @@ export function AddToCartButton({
     <div className="space-y-3">
       {/* Quantity selector */}
       <div>
-        <label className="text-sm font-medium text-stone-700 mb-1.5 block">
+        <label className="text-sm font-medium text-slate-700 mb-1.5 block">
           {t('quantity')}
         </label>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setQty((q) => Math.max(product.moq, q - 1))}
-            className="h-9 w-9 rounded-md border border-stone-200 flex items-center justify-center text-stone-600 hover:bg-stone-50 transition-colors"
+            className="h-9 w-9 rounded-md border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors"
             aria-label="Decrease quantity"
           >
             <Minus className="h-3.5 w-3.5" />
@@ -128,13 +157,13 @@ export function AddToCartButton({
           />
           <button
             onClick={() => setQty((q) => q + 1)}
-            className="h-9 w-9 rounded-md border border-stone-200 flex items-center justify-center text-stone-600 hover:bg-stone-50 transition-colors"
+            className="h-9 w-9 rounded-md border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors"
             aria-label="Increase quantity"
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
           {product.moq > 1 && (
-            <span className="text-xs text-stone-400">
+            <span className="text-xs text-slate-400">
               {t('moqNote', { moq: product.moq })}
             </span>
           )}
