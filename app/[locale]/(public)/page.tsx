@@ -22,7 +22,7 @@ export default async function HomePage() {
     getNewArrivals(8),
   ])
 
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
   const tNav = await getTranslations('nav')
 
   return (

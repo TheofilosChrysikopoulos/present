@@ -21,7 +21,7 @@ export default async function EnquiryDetailPage({
 }: EnquiryDetailPageProps) {
   const { id } = await params
   const locale = await getLocale()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
 
   const enquiry = await getEnquiryById(id)
   if (!enquiry) notFound()

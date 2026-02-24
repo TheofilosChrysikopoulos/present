@@ -51,7 +51,7 @@ export function ProductCard({ product }: ProductCardProps) {
     product.product_images?.[0]
 
   const name = locale === 'el' ? product.name_el : product.name_en
-  const href = locale === 'en' ? `/en/product/${product.sku}` : `/product/${product.sku}`
+  const href = `/${locale}/product/${product.sku}`
 
   // Show up to 4 color swatches
   const swatches = product.product_variants?.slice(0, 4) ?? []

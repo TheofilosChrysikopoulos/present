@@ -19,7 +19,7 @@ export function AdminSidebar() {
   const locale = useLocale()
   const pathname = usePathname()
   const router = useRouter()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
 
   const navItems = [
     {

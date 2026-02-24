@@ -12,16 +12,8 @@ export function LanguageToggle() {
   function toggle() {
     const nextLocale = locale === 'en' ? 'el' : 'en'
 
-    // Swap locale prefix in path
-    // Greek routes (default): /catalog → /en/catalog
-    // English routes: /en/catalog → /catalog
-    let newPath: string
-    if (locale === 'el') {
-      newPath = `/en${pathname}`
-    } else {
-      // Strip /en prefix
-      newPath = pathname.replace(/^\/en/, '') || '/'
-    }
+    // Swap locale prefix in path: /el/... ↔ /en/...
+    const newPath = pathname.replace(`/${locale}`, `/${nextLocale}`)
     router.push(newPath)
   }
 

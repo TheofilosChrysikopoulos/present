@@ -22,7 +22,7 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
 
   const hasFilters =
     searchParams.has('q') ||

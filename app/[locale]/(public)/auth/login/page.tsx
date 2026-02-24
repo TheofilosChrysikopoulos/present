@@ -28,7 +28,7 @@ type LoginFormValues = z.infer<typeof loginSchema>
 export default function LoginPage() {
   const t = useTranslations('auth')
   const locale = useLocale()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
   const [emailSent, setEmailSent] = useState(false)
   const [sentEmail, setSentEmail] = useState('')
 

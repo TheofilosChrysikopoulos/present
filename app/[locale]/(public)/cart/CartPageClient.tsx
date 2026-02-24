@@ -26,7 +26,7 @@ export function CartPageClient() {
   const tAuth = useTranslations('auth')
   const { items, clearCart, totalItems } = useCart()
   const { isApproved, isAuthenticated, loading: userLoading } = useUser()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
 
   // Gate: redirect unapproved users
   if (!userLoading && !isApproved) {

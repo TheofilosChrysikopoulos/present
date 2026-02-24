@@ -92,8 +92,13 @@ export async function POST(request: NextRequest) {
       { id: data.id, message: 'Registration successful' },
       { status: 201 }
     )
-  } catch (err) {
-    console.error('Registration API error:', err)
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err)
+    const stack = err instanceof Error ? err.stack : undefined
+    console.error('Registration API error:', message, stack)
+    return NextResponse.json(
+      { error: 'Server error', detail: message },
+      { status: 500 }
+    )
   }
 }

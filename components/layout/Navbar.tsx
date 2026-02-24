@@ -16,7 +16,7 @@ export async function Navbar() {
     getCategoryTree(),
   ])
 
-  const homeHref = locale === 'en' ? '/en' : '/'
+  const homeHref = `/${locale}`
 
   return (
     <header className="sticky top-0 z-40 bg-[#EBFBFF] border-b border-[#1e3a5f]/10 shadow-sm">

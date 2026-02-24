@@ -16,7 +16,7 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

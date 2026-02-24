@@ -62,5 +62,5 @@ export async function GET(request: NextRequest) {
   }
 
   // Redirect back to the home page after auth
-  return NextResponse.redirect(new URL('/', request.url))
+  return NextResponse.redirect(new URL('/el', request.url))
 }

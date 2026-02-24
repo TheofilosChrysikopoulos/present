@@ -124,7 +124,7 @@ function Pagination({
   searchParams: Record<string, string | string[] | undefined>
   locale: string
 }) {
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
 
   function buildUrl(p: number) {
     const params = new URLSearchParams()

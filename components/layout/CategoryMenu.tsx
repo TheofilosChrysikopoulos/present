@@ -28,7 +28,7 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
   }
 
   function getCategoryHref(slug: string) {
-    const base = locale === 'en' ? '/en' : ''
+    const base = `/${locale}`
     return `${base}/catalog/${slug}`
   }
 
@@ -40,7 +40,7 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
     return (
       <nav className="flex flex-col gap-1">
         <Link
-          href={locale === 'en' ? '/en/catalog' : '/catalog'}
+          href={`/${locale}/catalog`}
           className="px-3 py-2 text-sm font-medium text-stone-700 hover:bg-stone-100 rounded-md"
           onClick={onClose}
         >
@@ -65,7 +65,7 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
   return (
     <nav className="hidden lg:flex items-center gap-1">
       <Link
-        href={locale === 'en' ? '/en/catalog' : '/catalog'}
+        href={`/${locale}/catalog`}
         className={cn(
           'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
           pathname.endsWith('/catalog') || pathname.endsWith('/catalog/')

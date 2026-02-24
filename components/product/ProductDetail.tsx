@@ -54,7 +54,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
         }))
       : (product.product_images ?? [])
 
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

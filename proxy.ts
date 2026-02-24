@@ -16,14 +16,14 @@ export async function proxy(request: NextRequest) {
   // Run next-intl middleware for locale routing
   const intlResponse = intlMiddleware(request)
 
-  // Determine the locale from the pathname (default to 'el')
+  // Determine the locale from the pathname
   const localeMatch = pathname.match(/^\/(en|el)(\/|$)/)
   const locale = localeMatch ? localeMatch[1] : routing.defaultLocale
 
   // Check if this is an admin route (excluding the login page)
   const isAdminRoute =
-    pathname.match(/^\/(en\/|el\/)?admin/) &&
-    !pathname.match(/^\/(en\/|el\/)?admin\/login/)
+    pathname.match(/^\/(en|el)\/admin/) &&
+    !pathname.match(/^\/(en|el)\/admin\/login/)
 
   if (!isAdminRoute) {
     return intlResponse
@@ -57,7 +57,7 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getSession()
 
   const loginUrl = new URL(
-    locale === routing.defaultLocale ? '/admin/login' : `/${locale}/admin/login`,
+    `/${locale}/admin/login`,
     request.url
   )
 

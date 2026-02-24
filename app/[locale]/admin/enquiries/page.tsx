@@ -20,7 +20,7 @@ export default async function AdminEnquiriesPage({
 }: AdminEnquiriesPageProps) {
   const sp = await searchParams
   const locale = await getLocale()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
 
   const validStatuses = ['new', 'read', 'replied', 'archived'] as const
   const statusFilter = validStatuses.includes(

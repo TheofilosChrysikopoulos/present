@@ -5,7 +5,7 @@ import { Phone, Mail, Facebook } from 'lucide-react'
 
 export async function Footer() {
   const [locale, t] = await Promise.all([getLocale(), getTranslations('nav')])
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
 
   return (
     <footer className="bg-[#EBFBFF] text-[#1e3a5f] mt-auto border-t border-[#1e3a5f]/10">

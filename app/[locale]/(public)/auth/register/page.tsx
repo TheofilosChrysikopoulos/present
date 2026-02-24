@@ -31,7 +31,7 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 export default function RegisterPage() {
   const t = useTranslations('auth')
   const locale = useLocale()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
   const [submitted, setSubmitted] = useState(false)
 
   const form = useForm<RegisterFormValues>({

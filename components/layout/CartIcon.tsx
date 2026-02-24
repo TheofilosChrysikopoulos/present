@@ -11,7 +11,7 @@ export function CartIcon() {
   const { totalItems } = useCart()
   const { isApproved } = useUser()
   const locale = useLocale()
-  const href = locale === 'en' ? '/en/cart' : '/cart'
+  const href = `/${locale}/cart`
 
   // Only show cart icon for approved users
   if (!isApproved) return null

@@ -16,7 +16,7 @@ import type { Order } from '@/lib/types'
 export default function AccountPage() {
   const t = useTranslations('account')
   const locale = useLocale()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
   const router = useRouter()
   const { customer, loading, isAuthenticated, logout } = useUser()
   const [orders, setOrders] = useState<Order[]>([])

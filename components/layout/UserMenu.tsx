@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils'
 export function UserMenu() {
   const t = useTranslations('auth')
   const locale = useLocale()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
   const router = useRouter()
   const { customer, isAuthenticated, loading, logout } = useUser()
 

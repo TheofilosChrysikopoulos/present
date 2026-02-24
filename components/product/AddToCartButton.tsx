@@ -40,7 +40,7 @@ export function AddToCartButton({
   const t = useTranslations('product')
   const tAuth = useTranslations('auth')
   const locale = useLocale()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
   const { addItem, isInCart, getItemQty } = useCart()
   const { isApproved, isAuthenticated, loading: userLoading } = useUser()
   const [qty, setQty] = useState(product.moq)

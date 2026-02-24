@@ -53,7 +53,7 @@ interface ProductFormProps {
 export function ProductForm({ product, categories }: ProductFormProps) {
   const locale = useLocale()
   const router = useRouter()
-  const base = locale === 'en' ? '/en' : ''
+  const base = `/${locale}`
 
   const [images, setImages] = useState<UploadedImage[]>(
     product?.product_images?.map((img) => ({
