@@ -41,18 +41,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (customer.status === 'pending') {
-      return NextResponse.json(
-        { error: 'Your account is pending approval. You will receive an email once approved.', code: 'PENDING' },
-        { status: 403 }
-      )
-    }
-
     if (customer.status === 'rejected') {
       return NextResponse.json(
         { error: 'Your account has been rejected. Please contact support.' },
         { status: 403 }
       )
+    }
+
+    // If the customer doesn't have an auth user yet (legacy registration), create one now
+    if (!customer.auth_user_id) {
+      const { data: newAuthUser, error: createAuthError } = await supabase.auth.admin.createUser({
+        email,
+        email_confirm: true,
+      })
+
+      if (!createAuthError && newAuthUser?.user) {
+        await supabase
+          .from('customers')
+          .update({ auth_user_id: newAuthUser.user.id })
+          .eq('id', customer.id)
+      }
     }
 
     // Generate magic link via Supabase Admin API (does NOT send an email)

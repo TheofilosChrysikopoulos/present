@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { ShoppingCart, FileDown, Lock } from 'lucide-react'
 import { useCart } from '@/hooks/useCart'
 import { useUser } from '@/hooks/useUser'
+import { useAuthModal } from '@/lib/auth/authModalContext'
 import { CartItemRow } from '@/components/cart/CartItemRow'
 import { EnquiryForm } from '@/components/cart/EnquiryForm'
 import { Button } from '@/components/ui/button'
@@ -26,6 +27,7 @@ export function CartPageClient() {
   const tAuth = useTranslations('auth')
   const { items, clearCart, totalItems } = useCart()
   const { isApproved, isAuthenticated, loading: userLoading } = useUser()
+  const { openLogin, openRegister } = useAuthModal()
   const base = `/${locale}`
 
   // Gate: redirect unapproved users
@@ -38,12 +40,8 @@ export function CartPageClient() {
         </h1>
         {!isAuthenticated && (
           <div className="flex gap-3 justify-center mt-4">
-            <Button asChild variant="outline">
-              <Link href={`${base}/auth/login`}>{tAuth('loginLink')}</Link>
-            </Button>
-            <Button asChild>
-              <Link href={`${base}/auth/register`}>{tAuth('registerLink')}</Link>
-            </Button>
+            <Button variant="outline" onClick={openLogin}>{tAuth('loginLink')}</Button>
+            <Button onClick={openRegister}>{tAuth('registerLink')}</Button>
           </div>
         )}
       </div>

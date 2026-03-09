@@ -1,13 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useTranslations, useLocale } from 'next-intl'
 import { ShoppingCart, Check, Minus, Plus, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { useCart } from '@/hooks/useCart'
 import { useUser } from '@/hooks/useUser'
+import { useAuthModal } from '@/lib/auth/authModalContext'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { ProductVariantWithImages, ProductSize } from '@/lib/types'
@@ -43,28 +42,45 @@ export function AddToCartButton({
   const base = `/${locale}`
   const { addItem, isInCart, getItemQty } = useCart()
   const { isApproved, isAuthenticated, loading: userLoading } = useUser()
-  const [qty, setQty] = useState(product.moq)
+  const { openLogin, openRegister } = useAuthModal()
+  const moq = product.moq
+  const [qty, setQty] = useState(moq)
+  const [inputValue, setInputValue] = useState(String(moq))
   const [justAdded, setJustAdded] = useState(false)
 
-  // If user is not approved, show login/register prompt
-  if (!userLoading && !isApproved) {
+  /** Round up to nearest MOQ multiple (minimum = moq) */
+  function roundUpToMoq(value: number): number {
+    if (value <= moq) return moq
+    return Math.ceil(value / moq) * moq
+  }
+
+  // If user is not authenticated, show login/register prompt
+  if (!userLoading && !isAuthenticated) {
     return (
       <div className="space-y-3">
         <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg text-center">
           <Lock className="h-5 w-5 text-slate-400 mx-auto mb-2" />
           <p className="text-sm text-slate-600 mb-3">
-            {isAuthenticated ? tAuth('pendingApproval') : tAuth('loginToOrder')}
+            {tAuth('loginToOrder')}
           </p>
-          {!isAuthenticated && (
-            <div className="flex gap-2 justify-center">
-              <Button asChild size="sm" variant="outline">
-                <Link href={`${base}/auth/login`}>{tAuth('loginLink')}</Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link href={`${base}/auth/register`}>{tAuth('registerLink')}</Link>
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-2 justify-center">
+            <Button size="sm" variant="outline" onClick={openLogin}>{tAuth('loginLink')}</Button>
+            <Button size="sm" onClick={openRegister}>{tAuth('registerLink')}</Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // If user is authenticated but not approved (pending), show pending message
+  if (!userLoading && !isApproved) {
+    return (
+      <div className="space-y-3">
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-center">
+          <Lock className="h-5 w-5 text-amber-500 mx-auto mb-2" />
+          <p className="text-sm text-amber-700">
+            {tAuth('pendingApproval')}
+          </p>
         </div>
       </div>
     )
@@ -140,31 +156,53 @@ export function AddToCartButton({
         </label>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setQty((q) => Math.max(product.moq, q - 1))}
+            onClick={() => {
+              const next = roundUpToMoq(Math.max(moq, qty - moq))
+              setQty(next)
+              setInputValue(String(next))
+            }}
             className="h-9 w-9 rounded-md border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors"
             aria-label="Decrease quantity"
           >
             <Minus className="h-3.5 w-3.5" />
           </button>
-          <Input
-            type="number"
-            min={product.moq}
-            value={qty}
-            onChange={(e) =>
-              setQty(Math.max(product.moq, Number(e.target.value) || product.moq))
-            }
-            className="w-20 text-center h-9"
+          <input
+            type="text"
+            inputMode="numeric"
+            value={inputValue}
+            onChange={(e) => {
+              const raw = e.target.value.replace(/[^0-9]/g, '')
+              setInputValue(raw)
+              const num = parseInt(raw, 10)
+              if (!isNaN(num) && num >= moq) {
+                setQty(num)
+              }
+            }}
+            onBlur={() => {
+              const num = parseInt(inputValue, 10)
+              const rounded = roundUpToMoq(isNaN(num) || num < moq ? moq : num)
+              setQty(rounded)
+              setInputValue(String(rounded))
+            }}
+            onClick={(e) => {
+              ;(e.target as HTMLInputElement).select()
+            }}
+            className="w-20 text-center h-9 rounded-md border border-slate-200 outline-none bg-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           <button
-            onClick={() => setQty((q) => q + 1)}
+            onClick={() => {
+              const next = qty + moq
+              setQty(next)
+              setInputValue(String(next))
+            }}
             className="h-9 w-9 rounded-md border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors"
             aria-label="Increase quantity"
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
-          {product.moq > 1 && (
+          {moq > 1 && (
             <span className="text-xs text-slate-400">
-              {t('moqNote', { moq: product.moq })}
+              {t('moqNote', { moq: moq })}
             </span>
           )}
         </div>

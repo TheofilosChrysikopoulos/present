@@ -7,6 +7,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
+import Image from 'next/image'
+import { ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -25,6 +27,7 @@ import { ImageUploader, type UploadedImage } from './ImageUploader'
 import { VariantEditor, type VariantData } from './VariantEditor'
 import { SizeEditor, type SizeData } from './SizeEditor'
 import { createClient } from '@/lib/supabase/client'
+import { deleteStorageFile } from '@/lib/storage/uploadImage'
 import type { Category, ProductWithImages } from '@/lib/types'
 
 const productSchema = z.object({
@@ -56,6 +59,18 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const base = `/${locale}`
 
   const [images, setImages] = useState<UploadedImage[]>(
+    product?.product_images?.map((img) => ({
+      id: img.id,
+      storage_path: img.storage_path,
+      alt_en: img.alt_en ?? undefined,
+      alt_el: img.alt_el ?? undefined,
+      sort_order: img.sort_order,
+      is_primary: img.is_primary,
+    })) ?? []
+  )
+
+  // Track the initial image list so we can detect removals on save
+  const [initialImages] = useState<UploadedImage[]>(
     product?.product_images?.map((img) => ({
       id: img.id,
       storage_path: img.storage_path,
@@ -152,34 +167,48 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
       const savedId = savedProduct.id
 
-      // Save images
-      if (images.length > 0) {
-        // Delete existing images and re-insert
-        if (product?.id) {
+      // Save images — delete removed ones, update/insert remaining
+      if (product?.id) {
+        const keepImageIds = images.filter((i) => i.id).map((i) => i.id!)
+        if (keepImageIds.length > 0) {
+          // Delete images that were removed from the list
           await supabase
             .from('product_images')
             .delete()
             .eq('product_id', savedId)
-            .not('id', 'in', `(${images.filter((i) => i.id).map((i) => `'${i.id}'`).join(',')})`)
+            .not('id', 'in', `(${keepImageIds.map((id) => `'${id}'`).join(',')})`)
+        } else {
+          // All images removed — delete everything
+          await supabase
+            .from('product_images')
+            .delete()
+            .eq('product_id', savedId)
         }
+      }
 
-        for (let i = 0; i < images.length; i++) {
-          const img = images[i]
-          if (img.id) {
-            await supabase
-              .from('product_images')
-              .update({ sort_order: i, is_primary: img.is_primary })
-              .eq('id', img.id)
-          } else {
-            await supabase.from('product_images').insert({
-              product_id: savedId,
-              storage_path: img.storage_path,
-              alt_en: img.alt_en ?? null,
-              alt_el: img.alt_el ?? null,
-              sort_order: i,
-              is_primary: img.is_primary,
-            })
-          }
+      // Clean up storage files for removed images
+      const currentPaths = new Set(images.map((i) => i.storage_path))
+      const removedImages = initialImages.filter((i) => !currentPaths.has(i.storage_path))
+      for (const removed of removedImages) {
+        deleteStorageFile(removed.storage_path).catch(() => {})
+      }
+
+      for (let i = 0; i < images.length; i++) {
+        const img = images[i]
+        if (img.id) {
+          await supabase
+            .from('product_images')
+            .update({ sort_order: i, is_primary: img.is_primary })
+            .eq('id', img.id)
+        } else {
+          await supabase.from('product_images').insert({
+            product_id: savedId,
+            storage_path: img.storage_path,
+            alt_en: img.alt_en ?? null,
+            alt_el: img.alt_el ?? null,
+            sort_order: i,
+            is_primary: img.is_primary,
+          })
         }
       }
 
@@ -271,7 +300,6 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       }
 
       toast.success('Product saved successfully')
-      router.push(`${base}/admin/products`)
       router.refresh()
     } catch (err) {
       console.error(err)
@@ -294,6 +322,39 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
           {/* Basic Info */}
           <TabsContent value="basic" className="space-y-5 pt-5">
+            {/* Primary image preview */}
+            {(() => {
+              const primaryImg = images.find((img) => img.is_primary) ?? images[0]
+              const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+              return primaryImg ? (
+                <div className="flex items-center gap-4 p-3 bg-stone-50 rounded-lg border border-stone-200">
+                  <div className="h-16 w-16 rounded-lg overflow-hidden border border-stone-200 bg-white relative flex-shrink-0">
+                    <Image
+                      src={`${SUPABASE_URL}/storage/v1/object/public/product-images/${primaryImg.storage_path}`}
+                      alt="Primary product image"
+                      fill
+                      sizes="64px"
+                      className="object-contain p-1"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-stone-700">Primary Image</p>
+                    <p className="text-xs text-stone-400">Change image in the Images tab</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4 p-3 bg-stone-50 rounded-lg border border-dashed border-stone-300">
+                  <div className="h-16 w-16 rounded-lg border border-stone-200 bg-white flex items-center justify-center flex-shrink-0">
+                    <ImageIcon className="h-6 w-6 text-stone-300" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-stone-500">No Image</p>
+                    <p className="text-xs text-stone-400">Upload images in the Images tab</p>
+                  </div>
+                </div>
+              )
+            })()}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <FormField
                 control={form.control}
@@ -419,12 +480,15 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="__none__">No category</SelectItem>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.name_en}
-                            {cat.parent_id ? ` (sub)` : ''}
-                          </SelectItem>
-                        ))}
+                        {categories.map((cat) => {
+                          const parent = cat.parent_id ? categories.find(c => c.id === cat.parent_id) : null
+                          return (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.name_en}
+                              {parent ? ` (${parent.name_en})` : ''}
+                            </SelectItem>
+                          )
+                        })}
                       </SelectContent>
                     </Select>
                   </FormItem>

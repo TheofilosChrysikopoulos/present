@@ -84,3 +84,63 @@ export async function PATCH(
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
+
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const supabase = await createClient()
+
+    // Verify admin role
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single()
+
+    if (profile?.role !== 'admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const adminClient = createAdminClient()
+
+    // Get customer to find linked auth user
+    const { data: customer } = await adminClient
+      .from('customers')
+      .select('auth_user_id')
+      .eq('id', id)
+      .single()
+
+    // Delete orders linked to this customer
+    await adminClient.from('orders').delete().eq('customer_id', id)
+
+    // Delete customer record
+    const { error } = await adminClient.from('customers').delete().eq('id', id)
+    if (error) {
+      console.error('Customer delete error:', error)
+      return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+    }
+
+    // Delete linked auth user if exists
+    if (customer?.auth_user_id) {
+      await adminClient.auth.admin.deleteUser(customer.auth_user_id).catch((e) =>
+        console.error('Failed to delete auth user:', e)
+      )
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    console.error('Customer DELETE error:', err)
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+  }
+}

@@ -4,6 +4,7 @@ import { getLocale } from 'next-intl/server'
 import { ChevronLeft } from 'lucide-react'
 import { getEnquiryById } from '@/lib/queries/enquiries'
 import { EnquiryStatusUpdater } from './EnquiryStatusUpdater'
+import { OrderPdfExportButton } from '@/components/admin/OrderPdfExportButton'
 
 interface EnquiryDetailPageProps {
   params: Promise<{ id: string }>
@@ -28,7 +29,7 @@ export default async function EnquiryDetailPage({
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6">
         <Link
           href={`${base}/admin/enquiries`}
           className="text-stone-500 hover:text-stone-800 flex items-center gap-1 text-sm"
@@ -36,6 +37,18 @@ export default async function EnquiryDetailPage({
           <ChevronLeft className="h-4 w-4" />
           Enquiries
         </Link>
+        <OrderPdfExportButton
+          data={{
+            customerName: enquiry.name,
+            customerEmail: enquiry.email,
+            customerLocation: enquiry.company ?? undefined,
+            message: enquiry.message,
+            items: enquiry.cart_snapshot,
+            createdAt: enquiry.created_at,
+            status: enquiry.status,
+          }}
+          locale={locale}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

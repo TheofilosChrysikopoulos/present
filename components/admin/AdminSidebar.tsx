@@ -15,7 +15,12 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  pendingUsers?: number
+  newEnquiries?: number
+}
+
+export function AdminSidebar({ pendingUsers = 0, newEnquiries = 0 }: AdminSidebarProps) {
   const locale = useLocale()
   const pathname = usePathname()
   const router = useRouter()
@@ -27,26 +32,31 @@ export function AdminSidebar() {
       label: 'Dashboard',
       icon: LayoutDashboard,
       exact: true,
+      badge: 0,
     },
     {
       href: `${base}/admin/products`,
       label: 'Products',
       icon: Package,
+      badge: 0,
     },
     {
       href: `${base}/admin/categories`,
       label: 'Categories',
       icon: FolderTree,
+      badge: 0,
     },
     {
       href: `${base}/admin/enquiries`,
       label: 'Enquiries',
       icon: Mail,
+      badge: newEnquiries,
     },
     {
       href: `${base}/admin/users`,
       label: 'Users',
       icon: Users,
+      badge: pendingUsers,
     },
   ]
 
@@ -85,7 +95,17 @@ export function AdminSidebar() {
               )}
             >
               <item.icon className="h-4 w-4 flex-shrink-0" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {item.badge > 0 && (
+                <span className={cn(
+                  'ml-auto inline-flex items-center justify-center text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full',
+                  isActive
+                    ? 'bg-white text-stone-900'
+                    : 'bg-red-500 text-white'
+                )}>
+                  {item.badge > 99 ? '99+' : item.badge}
+                </span>
+              )}
             </Link>
           )
         })}

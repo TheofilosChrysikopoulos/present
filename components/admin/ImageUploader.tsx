@@ -4,8 +4,7 @@ import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
 import { X, Star, Upload } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { uploadProductImage, uploadVariantImage, deleteStorageFile } from '@/lib/storage/uploadImage'
+import { uploadProductImage, uploadVariantImage } from '@/lib/storage/uploadImage'
 import { cn } from '@/lib/utils'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
@@ -80,15 +79,11 @@ export function ImageUploader({
     )
   }
 
-  async function removeImage(index: number) {
+  function removeImage(index: number) {
     const img = images[index]
-    try {
-      await deleteStorageFile(img.storage_path)
-    } catch {
-      // Best effort — continue removing from UI even if storage delete fails
-    }
+
+    // Only update UI state — actual DB/storage deletion happens when the product is saved
     const updated = images.filter((_, i) => i !== index)
-    // Ensure there's still a primary if we removed the primary
     if (img.is_primary && updated.length > 0) {
       updated[0].is_primary = true
     }
@@ -144,11 +139,15 @@ export function ImageUploader({
               </div>
 
               {/* Actions overlay */}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 pointer-events-none">
                 <button
                   type="button"
-                  onClick={() => setPrimary(i)}
-                  className="h-7 w-7 rounded-full bg-white/90 flex items-center justify-center"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setPrimary(i)
+                  }}
+                  className="h-7 w-7 rounded-full bg-white/90 flex items-center justify-center pointer-events-auto cursor-pointer"
                   title="Set as primary"
                 >
                   <Star
@@ -160,11 +159,15 @@ export function ImageUploader({
                 </button>
                 <button
                   type="button"
-                  onClick={() => removeImage(i)}
-                  className="h-7 w-7 rounded-full bg-white/90 flex items-center justify-center"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    removeImage(i)
+                  }}
+                  className="h-7 w-7 rounded-full bg-white/90 flex items-center justify-center pointer-events-auto cursor-pointer"
                   title="Remove image"
                 >
-                  <X className="h-3.5 w-3.5 text-stone-600" />
+                  <X className="h-3.5 w-3.5 text-red-600" />
                 </button>
               </div>
 

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { useDebouncedCallback } from 'use-debounce'
 import {
   Users,
   UserCheck,
@@ -15,6 +16,7 @@ import {
   Mail,
   Package,
   Calendar,
+  Trash2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -56,7 +58,10 @@ export function AdminUsersClient({
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
-  const [searchValue, setSearchValue] = useState(currentFilters.search ?? '')
+
+  const debouncedSearch = useDebouncedCallback((value: string) => {
+    updateParams({ search: value || undefined })
+  }, 300)
 
   function updateParams(updates: Record<string, string | undefined>) {
     const params = new URLSearchParams(searchParams.toString())
@@ -76,10 +81,6 @@ export function AdminUsersClient({
     })
   }
 
-  function handleSearch() {
-    updateParams({ search: searchValue || undefined })
-  }
-
   async function handleStatusChange(customerId: string, newStatus: 'approved' | 'rejected') {
     try {
       const res = await fetch(`/api/admin/customers/${customerId}`, {
@@ -94,6 +95,20 @@ export function AdminUsersClient({
       router.refresh()
     } catch {
       toast.error('Failed to update customer status')
+    }
+  }
+
+  async function handleDelete(customerId: string) {
+    if (!confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) return
+    try {
+      const res = await fetch(`/api/admin/customers/${customerId}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('Delete failed')
+      toast.success('User deleted')
+      router.refresh()
+    } catch {
+      toast.error('Failed to delete user')
     }
   }
 
@@ -152,17 +167,14 @@ export function AdminUsersClient({
       <div className="bg-white border border-stone-200 rounded-xl p-4 mb-4">
         <div className="flex flex-wrap items-center gap-3">
           {/* Search */}
-          <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 pointer-events-none" />
             <Input
-              placeholder="Search by name, email, location..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className="h-9"
+              placeholder="Search by name, email, location, status..."
+              defaultValue={currentFilters.search ?? ''}
+              onChange={(e) => debouncedSearch(e.target.value)}
+              className="h-9 pl-9"
             />
-            <Button variant="outline" size="sm" onClick={handleSearch}>
-              <Search className="h-4 w-4" />
-            </Button>
           </div>
 
           {/* Status filter */}
@@ -339,6 +351,15 @@ export function AdminUsersClient({
                           Approve
                         </Button>
                       )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 w-8 p-0 text-red-500 border-red-200 hover:bg-red-50 hover:text-red-700"
+                        onClick={() => handleDelete(customer.id)}
+                        title="Delete user permanently"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 </div>

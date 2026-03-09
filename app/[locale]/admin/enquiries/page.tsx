@@ -3,9 +3,10 @@ import { getLocale } from 'next-intl/server'
 import { getEnquiries } from '@/lib/queries/enquiries'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { AdminEnquirySearch } from './AdminEnquirySearch'
 
 interface AdminEnquiriesPageProps {
-  searchParams: Promise<{ status?: string; page?: string }>
+  searchParams: Promise<{ status?: string; page?: string; q?: string }>
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -29,8 +30,11 @@ export default async function AdminEnquiriesPage({
     ? (sp.status as (typeof validStatuses)[number])
     : undefined
 
+  const searchQuery = sp.q?.trim() || undefined
+
   const { enquiries, total, page, totalPages } = await getEnquiries({
     status: statusFilter,
+    search: searchQuery,
     page: sp.page ? Number(sp.page) : 1,
     limit: 20,
   })
@@ -42,6 +46,11 @@ export default async function AdminEnquiriesPage({
           <h1 className="text-2xl font-bold text-stone-900">Enquiries</h1>
           <p className="text-sm text-stone-500 mt-0.5">{total} total</p>
         </div>
+      </div>
+
+      {/* Search */}
+      <div className="mb-4">
+        <AdminEnquirySearch />
       </div>
 
       {/* Status filter tabs */}

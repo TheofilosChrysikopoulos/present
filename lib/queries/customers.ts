@@ -117,9 +117,28 @@ export async function getCustomers(filters: CustomerFilters = {}) {
   }
 
   if (search) {
-    query = query.or(
-      `email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,location.ilike.%${search}%`
-    )
+    // Use RPC for accent-insensitive, case-insensitive substring search
+    try {
+      const { data: matchingIds, error: rpcError } = await supabase.rpc('search_customer_ids', { search_term: search })
+      if (rpcError) throw rpcError
+      const ids = (matchingIds as { id: string }[] | null)?.map(r => r.id) ?? []
+      if (ids.length > 0) {
+        query = query.in('id', ids)
+      } else {
+        return {
+          customers: [] as CustomerWithStats[],
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+        }
+      }
+    } catch {
+      // Fallback: basic ilike search
+      query = query.or(
+        `email.ilike.%${search}%,first_name.ilike.%${search}%,last_name.ilike.%${search}%,location.ilike.%${search}%,status.ilike.%${search}%,region.ilike.%${search}%`
+      )
+    }
   }
 
   // Sorting

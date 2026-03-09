@@ -233,6 +233,9 @@
     "registerError": "Registration failed. Please try again.",
     "loginToOrder": "Sign in or register to view prices and add products to your cart.",
     "pendingApproval": "Your account is pending approval. You'll be able to order once approved.",
+    "pendingBanner": "Your account is pending approval. You can browse products but prices and ordering are available once approved.",
+    "pendingPrice": "Pending approval",
+    "loginToViewPrice": "Login to view",
     "myAccount": "My Account",
     "logout": "Log Out"
   },

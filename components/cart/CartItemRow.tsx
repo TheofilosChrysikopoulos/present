@@ -104,7 +104,7 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
             {/* Qty stepper */}
             <div className="flex items-center gap-1">
               <button
-                onClick={() => updateQty(item.id, item.qty - 1)}
+                onClick={() => updateQty(item.id, item.qty - item.moq)}
                 className="h-7 w-7 rounded border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50"
                 aria-label="Decrease"
               >
@@ -112,7 +112,7 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
               </button>
               <span className="w-8 text-center text-sm font-medium">{item.qty}</span>
               <button
-                onClick={() => updateQty(item.id, item.qty + 1)}
+                onClick={() => updateQty(item.id, item.qty + item.moq)}
                 className="h-7 w-7 rounded border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50"
                 aria-label="Increase"
               >

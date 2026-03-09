@@ -58,6 +58,14 @@ export default function RegisterPage() {
         return
       }
 
+      const data = await res.json()
+
+      // Auto-login: redirect to the magic link callback URL
+      if (data.autoLoginUrl) {
+        window.location.href = data.autoLoginUrl
+        return
+      }
+
       setSubmitted(true)
     } catch {
       toast.error(t('registerError'))

@@ -6,6 +6,8 @@ import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import { CartProvider } from '@/lib/cart/cartContext'
 import { UserProvider } from '@/lib/auth/userContext'
+import { AuthModalProvider } from '@/lib/auth/authModalContext'
+import { AuthModal } from '@/components/layout/AuthModal'
 import { Toaster } from '@/components/ui/sonner'
 import '@/app/globals.css'
 
@@ -54,10 +56,13 @@ export default async function LocaleLayout({
       >
         <NextIntlClientProvider messages={messages}>
           <UserProvider>
-            <CartProvider>
-              {children}
-              <Toaster richColors position="bottom-right" />
-            </CartProvider>
+            <AuthModalProvider>
+              <CartProvider>
+                {children}
+                <AuthModal />
+                <Toaster richColors position="bottom-right" />
+              </CartProvider>
+            </AuthModalProvider>
           </UserProvider>
         </NextIntlClientProvider>
       </body>

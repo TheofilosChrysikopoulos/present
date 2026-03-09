@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { Phone, Mail, Facebook } from 'lucide-react'
+import { FooterAuthLinks } from './FooterAuthLinks'
 
 export async function Footer() {
   const [locale, t] = await Promise.all([getLocale(), getTranslations('nav')])
@@ -116,14 +117,7 @@ export async function Footer() {
           <p className="text-xs text-[#1e3a5f]/40">
             © {new Date().getFullYear()} Present Accessories. All rights reserved.
           </p>
-          <div className="flex items-center gap-4">
-            <Link href={`${base}/auth/login`} className="text-xs text-[#1e3a5f]/40 hover:text-[#B13D82] transition-colors">
-              {locale === 'el' ? 'Σύνδεση' : 'Login'}
-            </Link>
-            <Link href={`${base}/auth/register`} className="text-xs text-[#1e3a5f]/40 hover:text-[#B13D82] transition-colors">
-              {locale === 'el' ? 'Εγγραφή' : 'Register'}
-            </Link>
-          </div>
+          <FooterAuthLinks />
         </div>
       </div>
     </footer>

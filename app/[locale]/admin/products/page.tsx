@@ -1,11 +1,17 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getLocale } from 'next-intl/server'
-import { Plus, Pencil } from 'lucide-react'
+import { Plus, Pencil, ImageIcon } from 'lucide-react'
 import { getProducts } from '@/lib/queries/products'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { AdminProductSearch } from './AdminProductSearch'
 import { AdminDeleteProduct } from './AdminDeleteProduct'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+function imgUrl(path: string) {
+  return `${SUPABASE_URL}/storage/v1/object/public/product-images/${path}`
+}
 
 interface AdminProductsPageProps {
   searchParams: Promise<{ q?: string; page?: string }>
@@ -69,25 +75,52 @@ export default async function AdminProductsPage({
             </tr>
           </thead>
           <tbody className="divide-y divide-stone-100">
-            {products.map((product) => (
-              <tr key={product.id} className="hover:bg-stone-50">
+            {products.map((product) => {
+              const primaryImg = (product as any).product_images?.find((img: any) => img.is_primary) ?? (product as any).product_images?.[0]
+              return (
+              <tr key={product.id} className="hover:bg-stone-50 cursor-pointer">
                 <td className="px-4 py-3">
-                  <p className="font-medium text-stone-900">{product.name_en}</p>
-                  <p className="text-xs text-stone-400 md:hidden font-mono">
+                  <Link href={`${base}/admin/products/${product.id}`} className="flex items-center gap-3">
+                    {primaryImg ? (
+                      <div className="h-10 w-10 rounded-md overflow-hidden border border-stone-100 bg-white flex-shrink-0 relative">
+                        <Image
+                          src={imgUrl(primaryImg.storage_path)}
+                          alt={product.name_en}
+                          fill
+                          sizes="40px"
+                          className="object-contain p-0.5"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-10 w-10 rounded-md border border-stone-100 bg-stone-50 flex items-center justify-center flex-shrink-0">
+                        <ImageIcon className="h-4 w-4 text-stone-300" />
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-stone-900">{product.name_en}</p>
+                      <p className="text-xs text-stone-400 md:hidden font-mono">
+                        {product.sku}
+                      </p>
+                    </div>
+                  </Link>
+                </td>
+                <td className="px-4 py-3 hidden md:table-cell">
+                  <Link href={`${base}/admin/products/${product.id}`} className="block text-stone-500 font-mono text-xs">
                     {product.sku}
-                  </p>
+                  </Link>
                 </td>
-                <td className="px-4 py-3 text-stone-500 font-mono text-xs hidden md:table-cell">
-                  {product.sku}
+                <td className="px-4 py-3 hidden lg:table-cell">
+                  <Link href={`${base}/admin/products/${product.id}`} className="block text-stone-500">
+                    {(product as any).categories?.name_en ?? '—'}
+                  </Link>
                 </td>
-                <td className="px-4 py-3 text-stone-500 hidden lg:table-cell">
-                  {(product as any).categories?.name_en ?? '—'}
-                </td>
-                <td className="px-4 py-3 text-right font-medium">
-                  €{product.price.toFixed(2)}
+                <td className="px-4 py-3 text-right">
+                  <Link href={`${base}/admin/products/${product.id}`} className="block font-medium">
+                    €{product.price.toFixed(2)}
+                  </Link>
                 </td>
                 <td className="px-4 py-3 text-center hidden md:table-cell">
-                  <div className="flex items-center justify-center gap-1">
+                  <Link href={`${base}/admin/products/${product.id}`} className="flex items-center justify-center gap-1">
                     {product.is_active ? (
                       <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
                         Active
@@ -103,7 +136,7 @@ export default async function AdminProductsPage({
                     {product.is_new_arrival && (
                       <Badge variant="outline" className="text-xs">New</Badge>
                     )}
-                  </div>
+                  </Link>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-end gap-2">
@@ -116,7 +149,8 @@ export default async function AdminProductsPage({
                   </div>
                 </td>
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
 

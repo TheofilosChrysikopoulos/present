@@ -2,7 +2,8 @@
 
 import { cn } from '@/lib/utils'
 import { useUser } from '@/hooks/useUser'
-import { Lock } from 'lucide-react'
+import { Lock, Clock } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface PriceBadgeProps {
   price: number
@@ -13,9 +14,29 @@ interface PriceBadgeProps {
 }
 
 export function PriceBadge({ price, className, size = 'md', alwaysShow = false }: PriceBadgeProps) {
-  const { isApproved, loading } = useUser()
+  const { isApproved, isAuthenticated, loading } = useUser()
+  const t = useTranslations('auth')
 
   if (!alwaysShow && !loading && !isApproved) {
+    // Pending/authenticated but not approved — show pending message
+    if (isAuthenticated) {
+      return (
+        <span
+          className={cn(
+            'inline-flex items-center gap-1 text-amber-500',
+            size === 'sm' && 'text-xs',
+            size === 'md' && 'text-sm',
+            size === 'lg' && 'text-base',
+            className
+          )}
+        >
+          <Clock className="h-3 w-3" />
+          <span>{t('pendingPrice')}</span>
+        </span>
+      )
+    }
+
+    // Not authenticated at all
     return (
       <span
         className={cn(
@@ -27,7 +48,7 @@ export function PriceBadge({ price, className, size = 'md', alwaysShow = false }
         )}
       >
         <Lock className="h-3 w-3" />
-        <span>Login to view</span>
+        <span>{t('loginToViewPrice')}</span>
       </span>
     )
   }

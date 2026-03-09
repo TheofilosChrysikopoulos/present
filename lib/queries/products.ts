@@ -56,6 +56,7 @@ export async function getProducts(filters: ProductFilters = {}) {
     `id, sku, name_en, name_el, price, moq, category_id,
     tags, is_featured, is_new_arrival, is_active, sort_order, created_at, updated_at,
     product_images (id, storage_path, alt_en, alt_el, sort_order, is_primary),
+    product_variants (id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, sort_order),
     categories (id, slug, name_en, name_el, parent_id, sort_order)`,
     { count: 'exact' }
   )
@@ -71,11 +72,47 @@ export async function getProducts(filters: ProductFilters = {}) {
   }
 
   if (search) {
-    query = query.textSearch(
-      'name_en,name_el,sku,description_en,description_el',
-      search,
-      { type: 'websearch', config: 'simple' }
-    )
+    // Use RPC for accent-insensitive, case-insensitive substring search (includes category names)
+    // Falls back to basic ilike if the RPC function hasn't been created yet
+    try {
+      const { data: matchingIds, error: rpcError } = await supabase.rpc('search_product_ids', { search_term: search })
+      if (rpcError) throw rpcError
+      const ids = (matchingIds as { id: string }[] | null)?.map(r => r.id) ?? []
+      if (ids.length > 0) {
+        query = query.in('id', ids)
+      } else {
+        return { products: [], total: 0, page, limit, totalPages: 0 }
+      }
+    } catch {
+      // Fallback: basic ilike search (case-insensitive but not accent-insensitive)
+      const { data: matchingCats } = await supabase
+        .from('categories')
+        .select('id')
+        .or(`name_en.ilike.%${search}%,name_el.ilike.%${search}%`)
+      const matchedCatIds = matchingCats?.map((c) => c.id) ?? []
+
+      // Also find child categories whose parents match the search
+      let catIds = [...matchedCatIds]
+      if (matchedCatIds.length > 0) {
+        const { data: childCats } = await supabase
+          .from('categories')
+          .select('id')
+          .in('parent_id', matchedCatIds)
+        if (childCats) {
+          catIds = [...catIds, ...childCats.map((c) => c.id)]
+        }
+      }
+
+      if (catIds.length > 0) {
+        query = query.or(
+          `name_en.ilike.%${search}%,name_el.ilike.%${search}%,sku.ilike.%${search}%,description_en.ilike.%${search}%,description_el.ilike.%${search}%,category_id.in.(${catIds.join(',')})`
+        )
+      } else {
+        query = query.or(
+          `name_en.ilike.%${search}%,name_el.ilike.%${search}%,sku.ilike.%${search}%,description_en.ilike.%${search}%,description_el.ilike.%${search}%`
+        )
+      }
+    }
   }
 
   if (categoryIds?.length) {

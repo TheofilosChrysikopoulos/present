@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { User, LogIn, UserPlus, LogOut } from 'lucide-react'
 import { useUser } from '@/hooks/useUser'
+import { useAuthModal } from '@/lib/auth/authModalContext'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,6 +22,7 @@ export function UserMenu() {
   const base = `/${locale}`
   const router = useRouter()
   const { customer, isAuthenticated, loading, logout } = useUser()
+  const { openLogin, openRegister } = useAuthModal()
 
   if (loading) {
     return (
@@ -31,17 +33,13 @@ export function UserMenu() {
   if (!isAuthenticated) {
     return (
       <div className="flex items-center gap-1">
-        <Button asChild variant="ghost" size="sm" className="h-9 text-sm gap-1.5 text-[#1e3a5f]/70 hover:text-[#1e3a5f] hover:bg-[#1e3a5f]/10">
-          <Link href={`${base}/auth/login`}>
-            <LogIn className="h-4 w-4" />
-            <span className="hidden sm:inline">{t('login')}</span>
-          </Link>
+        <Button variant="ghost" size="sm" className="h-9 text-sm gap-1.5 text-[#1e3a5f]/70 hover:text-[#1e3a5f] hover:bg-[#1e3a5f]/10" onClick={openLogin}>
+          <LogIn className="h-4 w-4" />
+          <span className="hidden sm:inline">{t('login')}</span>
         </Button>
-        <Button asChild size="sm" className="h-9 text-sm gap-1.5 hidden sm:inline-flex bg-[#BFDBFE] hover:bg-[#93C5FD] text-[#1e3a5f] border-0">
-          <Link href={`${base}/auth/register`}>
-            <UserPlus className="h-4 w-4" />
-            {t('register')}
-          </Link>
+        <Button size="sm" className="h-9 text-sm gap-1.5 hidden sm:inline-flex bg-[#BFDBFE] hover:bg-[#93C5FD] text-[#1e3a5f] border-0" onClick={openRegister}>
+          <UserPlus className="h-4 w-4" />
+          {t('register')}
         </Button>
       </div>
     )

@@ -8,6 +8,7 @@ import { getCategoryTree } from '@/lib/queries/categories'
 import { ProductGrid } from '@/components/catalog/ProductGrid'
 import { getLocalizedField } from '@/lib/types'
 import { Button } from '@/components/ui/button'
+import { HeroRegisterButton } from '@/components/layout/HeroRegisterButton'
 
 export const metadata: Metadata = {
   title: 'Present Accessories — Wholesale Tourist Products',
@@ -69,11 +70,7 @@ export default async function HomePage() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="gap-2 font-semibold bg-white/90 border-white text-[#1e3a5f] hover:bg-transparent hover:text-white hover:border-white/60 transition-all">
-                <Link href={`${base}/auth/register`}>
-                  {t('hero.register', { defaultValue: 'Get Started' })}
-                </Link>
-              </Button>
+              <HeroRegisterButton label={t('hero.register', { defaultValue: 'Get Started' })} />
             </div>
           </div>
         </div>

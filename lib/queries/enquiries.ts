@@ -24,13 +24,14 @@ export async function createEnquiry(input: CreateEnquiryInput): Promise<Enquiry>
 
 export interface EnquiryFilters {
   status?: Enquiry['status']
+  search?: string
   page?: number
   limit?: number
 }
 
 export async function getEnquiries(filters: EnquiryFilters = {}) {
   const supabase = await createClient()
-  const { status, page = 1, limit = 20 } = filters
+  const { status, search, page = 1, limit = 20 } = filters
 
   let query = supabase
     .from('enquiries')
@@ -39,6 +40,25 @@ export async function getEnquiries(filters: EnquiryFilters = {}) {
 
   if (status) {
     query = query.eq('status', status)
+  }
+
+  if (search) {
+    // Use RPC for accent-insensitive search + cart_snapshot JSONB search
+    try {
+      const { data: matchingIds, error: rpcError } = await supabase.rpc('search_enquiry_ids', { search_term: search })
+      if (rpcError) throw rpcError
+      const ids = (matchingIds as { id: string }[] | null)?.map(r => r.id) ?? []
+      if (ids.length > 0) {
+        query = query.in('id', ids)
+      } else {
+        return { enquiries: [] as Enquiry[], total: 0, page, limit, totalPages: 0 }
+      }
+    } catch {
+      // Fallback: basic ilike search (without cart_snapshot which doesn't support ::text in PostgREST)
+      query = query.or(
+        `name.ilike.%${search}%,email.ilike.%${search}%,company.ilike.%${search}%,message.ilike.%${search}%`
+      )
+    }
   }
 
   const from = (page - 1) * limit
