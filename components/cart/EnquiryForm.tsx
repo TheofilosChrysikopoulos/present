@@ -48,7 +48,7 @@ export function EnquiryForm() {
       name_en: item.nameEn,
       name_el: item.nameEl,
       qty: item.qty,
-      price: item.price,
+      price: item.discountPrice ?? item.price,
       variant_id: item.variant?.id,
       variant_color_en: item.variant?.colorNameEn,
       variant_color_el: item.variant?.colorNameEl,

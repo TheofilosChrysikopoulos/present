@@ -18,6 +18,7 @@ interface AddToCartButtonProps {
     name_en: string
     name_el: string
     price: number
+    discount_price?: number | null
     moq: number
     product_images?: Array<{ storage_path: string; is_primary: boolean }>
   }
@@ -131,6 +132,7 @@ export function AddToCartButton({
       nameEn: product.name_en,
       nameEl: product.name_el,
       price: product.price,
+      discountPrice: product.discount_price ?? null,
       moq: product.moq,
       qty,
       variant: variantInfo,

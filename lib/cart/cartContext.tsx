@@ -63,6 +63,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         nameEn: itemInput.nameEn,
         nameEl: itemInput.nameEl,
         price: itemInput.price,
+        discountPrice: itemInput.discountPrice ?? null,
         moq: itemInput.moq,
         qty: Math.max(itemInput.qty, itemInput.moq),
         variant: itemInput.variant,

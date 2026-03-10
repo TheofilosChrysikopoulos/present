@@ -23,6 +23,7 @@ export interface CartItem {
   nameEn: string
   nameEl: string
   price: number
+  discountPrice: number | null
   moq: number
   qty: number
   variant: CartVariant | null

@@ -44,7 +44,7 @@ export async function generateCartPdf(
 
   const fontFamily = robotoRegistered ? 'Roboto' : 'Helvetica'
   const fontFamilyBold = robotoRegistered ? 'Roboto-Bold' : 'Helvetica-Bold'
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0)
+  const subtotal = items.reduce((sum, i) => sum + (i.discountPrice ?? i.price) * i.qty, 0)
 
   const styles = StyleSheet.create({
     page: {
@@ -207,7 +207,7 @@ export async function generateCartPdf(
             </Text>
             <Text style={[styles.colQty, styles.cellText]}>{item.qty}</Text>
             <Text style={[styles.colPrice, styles.cellText]}>
-              {formatCurrency(item.price * item.qty)}
+              {formatCurrency((item.discountPrice ?? item.price) * item.qty)}
             </Text>
           </View>
         ))}

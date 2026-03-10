@@ -123,13 +123,24 @@ export function CartItemRow({ item, compact = false }: CartItemRowProps) {
               )}
             </div>
 
-            <PriceBadge price={item.price * item.qty} size="sm" />
+            {item.discountPrice != null ? (
+              <span className="inline-flex items-center gap-1.5 tabular-nums">
+                <span className="line-through text-slate-400 text-xs">
+                  €{(item.price * item.qty).toFixed(2)}
+                </span>
+                <span className="font-semibold text-red-600 text-sm">
+                  €{(item.discountPrice * item.qty).toFixed(2)}
+                </span>
+              </span>
+            ) : (
+              <PriceBadge price={item.price * item.qty} size="sm" />
+            )}
           </div>
         )}
 
         {compact && (
           <p className="text-xs text-slate-500 mt-1">
-            {t('qty')}: {item.qty} × <PriceBadge price={item.price} size="sm" />
+            {t('qty')}: {item.qty} × <PriceBadge price={item.discountPrice ?? item.price} size="sm" />
           </p>
         )}
       </div>

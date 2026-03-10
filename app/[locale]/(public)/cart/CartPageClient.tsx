@@ -48,7 +48,7 @@ export function CartPageClient() {
     )
   }
 
-  const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0)
+  const subtotal = items.reduce((sum, i) => sum + (i.discountPrice ?? i.price) * i.qty, 0)
 
   if (items.length === 0) {
     return (
