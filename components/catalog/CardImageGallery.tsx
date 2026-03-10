@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -18,6 +19,7 @@ interface CardImageGalleryProps {
 }
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+const SWIPE_THRESHOLD = 30
 
 function getImageUrl(path: string) {
   return `${SUPABASE_URL}/storage/v1/object/public/product-images/${path}`
@@ -31,6 +33,26 @@ export function CardImageGallery({
   onChangeIndex,
 }: CardImageGalleryProps) {
   const count = images.length
+  const touchStartX = useRef(0)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+  }, [])
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      const dx = e.changedTouches[0].clientX - touchStartX.current
+      if (Math.abs(dx) < SWIPE_THRESHOLD) return
+      if (dx < 0) {
+        // swipe left → next
+        onChangeIndex(activeIndex >= count - 1 ? 0 : activeIndex + 1)
+      } else {
+        // swipe right → prev
+        onChangeIndex(activeIndex <= 0 ? count - 1 : activeIndex - 1)
+      }
+    },
+    [activeIndex, count, onChangeIndex]
+  )
 
   if (count === 0) {
     return (
@@ -47,8 +69,16 @@ export function CardImageGallery({
   const safeIndex = Math.min(activeIndex, count - 1)
   const img = images[safeIndex]
 
+  // Buttons: hidden by default, visible on hover for pointer devices; always visible on touch devices
+  const btnClass =
+    'absolute top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-white/80 shadow-sm flex items-center justify-center text-slate-600 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/gallery:opacity-100 hover:bg-white'
+
   return (
-    <div className="relative aspect-square bg-white overflow-hidden group/gallery">
+    <div
+      className="relative aspect-square bg-white overflow-hidden group/gallery touch-pan-y"
+      onTouchStart={count > 1 ? handleTouchStart : undefined}
+      onTouchEnd={count > 1 ? handleTouchEnd : undefined}
+    >
       <Image
         src={getImageUrl(img.storage_path)}
         alt={(locale === 'el' ? img.alt_el : img.alt_en) ?? productName}
@@ -66,7 +96,7 @@ export function CardImageGallery({
               e.stopPropagation()
               onChangeIndex(safeIndex <= 0 ? count - 1 : safeIndex - 1)
             }}
-            className="absolute left-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-white/80 shadow-sm flex items-center justify-center text-slate-600 opacity-0 group-hover/gallery:opacity-100 transition-opacity hover:bg-white"
+            className={cn(btnClass, 'left-1')}
             aria-label="Previous image"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -77,7 +107,7 @@ export function CardImageGallery({
               e.stopPropagation()
               onChangeIndex(safeIndex >= count - 1 ? 0 : safeIndex + 1)
             }}
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-white/80 shadow-sm flex items-center justify-center text-slate-600 opacity-0 group-hover/gallery:opacity-100 transition-opacity hover:bg-white"
+            className={cn(btnClass, 'right-1')}
             aria-label="Next image"
           >
             <ChevronRight className="h-4 w-4" />
