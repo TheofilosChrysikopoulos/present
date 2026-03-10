@@ -32,6 +32,7 @@ export interface Product {
   description_en: string | null
   description_el: string | null
   price: number
+  discount_price: number | null
   moq: number
   category_id: string | null
   tags: string[]

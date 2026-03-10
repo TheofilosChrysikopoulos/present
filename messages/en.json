@@ -20,6 +20,7 @@
   },
   "product": {
     "price": "Wholesale Price",
+    "salePrice": "Sale Price",
     "moq": "Min. Order",
     "moqNote": "Minimum {moq} units",
     "addToCart": "Add to Cart",

@@ -34,6 +34,7 @@ const productSchema = z.object({
   description_en: z.string().optional(),
   description_el: z.string().optional(),
   price: z.string().min(1, 'Price required'),
+  discount_price: z.string().optional(),
   moq: z.string().min(1, 'MOQ required'),
   category_id: z.string().optional(),
   tags: z.string().optional(),
@@ -128,6 +129,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       description_en: product?.description_en ?? '',
       description_el: product?.description_el ?? '',
       price: product?.price?.toString() ?? '',
+      discount_price: product?.discount_price?.toString() ?? '',
       moq: product?.moq?.toString() ?? '1',
       category_id: product?.category_id ?? '',
       tags: product?.tags?.join(', ') ?? '',
@@ -154,6 +156,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         description_en: values.description_en || null,
         description_el: values.description_el || null,
         price: parseFloat(values.price),
+        discount_price: values.discount_price ? parseFloat(values.discount_price) : null,
         moq: parseInt(values.moq),
         category_id: values.category_id || null,
         tags: values.tags
@@ -385,7 +388,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                   </FormItem>
                 )}
               />
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <FormField
                   control={form.control}
                   name="price"
@@ -394,6 +397,19 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                       <FormLabel>Price (€) *</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" min="0" placeholder="0.00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="discount_price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sale Price (€)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min="0" placeholder="Leave empty" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

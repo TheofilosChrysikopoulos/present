@@ -138,7 +138,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
           {/* Price and MOQ */}
           <div className="flex items-baseline gap-3 mb-4">
-            <PriceBadge price={product.price} size="lg" />
+            <PriceBadge price={product.price} discountPrice={product.discount_price} size="lg" />
             {product.moq > 1 && (
               <span className="text-sm text-slate-500">
                 {t('moqNote', { moq: product.moq })}

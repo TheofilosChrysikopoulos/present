@@ -7,13 +7,16 @@ import { useTranslations } from 'next-intl'
 
 interface PriceBadgeProps {
   price: number
+  discountPrice?: number | null
   className?: string
   size?: 'sm' | 'md' | 'lg'
   /** Skip the auth gate (useful in admin pages) */
   alwaysShow?: boolean
 }
 
-export function PriceBadge({ price, className, size = 'md', alwaysShow = false }: PriceBadgeProps) {
+const fmt = new Intl.NumberFormat('el-GR', { style: 'currency', currency: 'EUR' })
+
+export function PriceBadge({ price, discountPrice, className, size = 'md', alwaysShow = false }: PriceBadgeProps) {
   const { isApproved, isAuthenticated, loading } = useUser()
   const t = useTranslations('auth')
 
@@ -53,10 +56,34 @@ export function PriceBadge({ price, className, size = 'md', alwaysShow = false }
     )
   }
 
-  const formatted = new Intl.NumberFormat('el-GR', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(price)
+  const hasDiscount = discountPrice != null && discountPrice < price
+
+  if (hasDiscount) {
+    return (
+      <span className={cn('inline-flex items-center gap-1.5 tabular-nums', className)}>
+        <span
+          className={cn(
+            'line-through text-slate-400 font-medium',
+            size === 'sm' && 'text-xs',
+            size === 'md' && 'text-sm',
+            size === 'lg' && 'text-base'
+          )}
+        >
+          {fmt.format(price)}
+        </span>
+        <span
+          className={cn(
+            'font-semibold text-red-600',
+            size === 'sm' && 'text-sm',
+            size === 'md' && 'text-base',
+            size === 'lg' && 'text-xl'
+          )}
+        >
+          {fmt.format(discountPrice)}
+        </span>
+      </span>
+    )
+  }
 
   return (
     <span
@@ -68,7 +95,7 @@ export function PriceBadge({ price, className, size = 'md', alwaysShow = false }
         className
       )}
     >
-      {formatted}
+      {fmt.format(price)}
     </span>
   )
 }

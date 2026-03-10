@@ -31,6 +31,7 @@ interface ProductCardProps {
     name_en: string
     name_el: string
     price: number
+    discount_price?: number | null
     moq: number
     is_featured: boolean
     is_new_arrival: boolean
@@ -216,7 +217,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </h3>
 
           <div className="mt-2 flex items-center justify-between gap-2">
-            <PriceBadge price={product.price} size="sm" />
+            <PriceBadge price={product.price} discountPrice={product.discount_price} size="sm" />
             {product.moq > 1 && (
               <span className="text-[11px] text-slate-400">
                 {t('moqNote', { moq: product.moq })}
