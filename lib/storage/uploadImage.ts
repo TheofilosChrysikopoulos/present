@@ -1,13 +1,18 @@
 import { createClient } from '@/lib/supabase/client'
 import { STORAGE_BUCKET } from '@/lib/types'
 
+function uuid() {
+  return globalThis.crypto?.randomUUID?.() ??
+    (Math.random().toString(36).slice(2) + Date.now().toString(36) + Math.random().toString(36).slice(2))
+}
+
 export async function uploadProductImage(
   file: File,
   productId: string
 ): Promise<{ path: string; publicUrl: string }> {
   const supabase = createClient()
   const ext = file.name.split('.').pop() ?? 'jpg'
-  const filename = `${crypto.randomUUID()}.${ext}`
+  const filename = `${uuid()}.${ext}`
   const path = `products/${productId}/${filename}`
 
   const { error } = await supabase.storage
@@ -27,7 +32,7 @@ export async function uploadVariantImage(
 ): Promise<{ path: string; publicUrl: string }> {
   const supabase = createClient()
   const ext = file.name.split('.').pop() ?? 'jpg'
-  const filename = `${crypto.randomUUID()}.${ext}`
+  const filename = `${uuid()}.${ext}`
   const path = `variants/${variantId}/${filename}`
 
   const { error } = await supabase.storage

@@ -132,7 +132,8 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     },
   })
 
-  const productId = product?.id ?? crypto.randomUUID()
+  const productId = product?.id ?? globalThis.crypto?.randomUUID?.() ??
+    (Math.random().toString(36).slice(2) + Date.now().toString(36) + Math.random().toString(36).slice(2))
 
   async function onSubmit(values: ProductFormValues) {
     setSaving(true)
@@ -253,7 +254,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         } else {
           const { data: savedVariant } = await supabase
             .from('product_variants')
-            .insert({ ...variantData, id: crypto.randomUUID() })
+            .insert(variantData)
             .select('id')
             .single()
 
@@ -335,7 +336,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         } else {
           await supabase
             .from('product_sizes')
-            .insert({ ...sizeData, id: crypto.randomUUID() })
+            .insert(sizeData)
         }
       }
 
