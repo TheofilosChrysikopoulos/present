@@ -76,7 +76,14 @@ export default async function AdminProductsPage({
           </thead>
           <tbody className="divide-y divide-stone-100">
             {products.map((product) => {
-              const primaryImg = (product as any).product_images?.find((img: any) => img.is_primary) ?? (product as any).product_images?.[0]
+              // Resolve primary image from primary variant's images, falling back to first variant then product_images
+              const pv = (product as any).product_variants as any[] | undefined
+              const primaryVariant = pv?.find((v: any) => v.is_primary) ?? pv?.[0]
+              const variantImgs = primaryVariant?.variant_images as any[] | undefined
+              const primaryImg = variantImgs?.find((img: any) => img.is_primary)
+                ?? variantImgs?.[0]
+                ?? (product as any).product_images?.find((img: any) => img.is_primary)
+                ?? (product as any).product_images?.[0]
               return (
               <tr key={product.id} className="hover:bg-stone-50 cursor-pointer">
                 <td className="px-4 py-3">
@@ -116,7 +123,14 @@ export default async function AdminProductsPage({
                 </td>
                 <td className="px-4 py-3 text-right">
                   <Link href={`${base}/admin/products/${product.id}`} className="block font-medium">
-                    €{product.price.toFixed(2)}
+                    {(product as any).discount_price != null ? (
+                      <>
+                        <span className="line-through text-stone-400 text-xs mr-1">€{product.price.toFixed(2)}</span>
+                        <span className="text-red-600">€{Number((product as any).discount_price).toFixed(2)}</span>
+                      </>
+                    ) : (
+                      <>€{product.price.toFixed(2)}</>
+                    )}
                   </Link>
                 </td>
                 <td className="px-4 py-3 text-center hidden md:table-cell">

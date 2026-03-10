@@ -42,7 +42,10 @@ const productSchema = z.object({
   is_featured: z.boolean(),
   is_new_arrival: z.boolean(),
   is_active: z.boolean(),
-})
+}).refine(
+  (d) => !d.discount_price || parseFloat(d.discount_price) < parseFloat(d.price),
+  { message: 'Sale price must be less than the original price', path: ['discount_price'] }
+)
 
 type ProductFormValues = z.infer<typeof productSchema>
 
@@ -314,9 +317,9 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
       toast.success('Product saved successfully')
       router.refresh()
-    } catch (err) {
+    } catch (err: any) {
       console.error(err)
-      toast.error('Failed to save product')
+      toast.error(err?.message || 'Failed to save product')
     } finally {
       setSaving(false)
     }
