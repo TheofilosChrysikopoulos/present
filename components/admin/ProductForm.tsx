@@ -24,8 +24,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { ImageUploader, type UploadedImage } from './ImageUploader'
-import { VariantEditor, type VariantData } from './VariantEditor'
-import { SizeEditor, type SizeData } from './SizeEditor'
+import { VariantEditor, type VariantData, type SizeData } from './VariantEditor'
 import { createClient } from '@/lib/supabase/client'
 import { deleteStorageFile } from '@/lib/storage/uploadImage'
 import type { Category, ProductWithImages } from '@/lib/types'
@@ -81,14 +80,26 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     })) ?? []
   )
 
-  const [variants, setVariants] = useState<VariantData[]>(
-    product?.product_variants?.map((v) => ({
+  const [variants, setVariants] = useState<VariantData[]>(() => {
+    const pvs = product?.product_variants ?? []
+    const productSizes = (product?.product_sizes ?? []).map((s) => ({
+      id: s.id,
+      label_en: s.label_en,
+      label_el: s.label_el,
+      sku_suffix: s.sku_suffix ?? '',
+      sort_order: s.sort_order,
+    }))
+    const primaryIdx = pvs.findIndex((v) => v.is_primary)
+    const sizesOwner = primaryIdx >= 0 ? primaryIdx : 0
+
+    return pvs.map((v, i) => ({
       id: v.id,
       sku_suffix: v.sku_suffix ?? '',
       color_name_en: v.color_name_en,
       color_name_el: v.color_name_el,
       hex_color: v.hex_color ?? '#e7e5e4',
       variant_type: v.variant_type,
+      is_primary: v.is_primary ?? false,
       sort_order: v.sort_order,
       images: (v.variant_images ?? []).map((vi) => ({
         id: vi.id,
@@ -96,18 +107,9 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         sort_order: vi.sort_order,
         is_primary: vi.is_primary,
       })),
-    })) ?? []
-  )
-
-  const [sizes, setSizes] = useState<SizeData[]>(
-    product?.product_sizes?.map((s) => ({
-      id: s.id,
-      label_en: s.label_en,
-      label_el: s.label_el,
-      sku_suffix: s.sku_suffix ?? '',
-      sort_order: s.sort_order,
-    })) ?? []
-  )
+      sizes: i === sizesOwner ? productSizes : [],
+    }))
+  })
 
   const [saving, setSaving] = useState(false)
 
@@ -239,6 +241,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           color_name_el: v.color_name_el,
           hex_color: v.hex_color || null,
           variant_type: v.variant_type,
+          is_primary: v.is_primary,
           sort_order: i,
         }
 
@@ -257,12 +260,49 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           // Update local variant with new ID so image uploader works
           variants[i] = { ...v, id: savedVariant?.id }
         }
+
+        // Save variant images
+        const variantId = variants[i].id
+        if (variantId) {
+          const keepImgIds = v.images.filter((img) => img.id).map((img) => img.id!)
+          if (keepImgIds.length > 0) {
+            await supabase
+              .from('variant_images')
+              .delete()
+              .eq('variant_id', variantId)
+              .not('id', 'in', `(${keepImgIds.map((id) => `'${id}'`).join(',')})`)
+          } else if (product?.id) {
+            await supabase
+              .from('variant_images')
+              .delete()
+              .eq('variant_id', variantId)
+          }
+
+          for (let j = 0; j < v.images.length; j++) {
+            const img = v.images[j]
+            if (img.id) {
+              await supabase
+                .from('variant_images')
+                .update({ sort_order: j, is_primary: img.is_primary })
+                .eq('id', img.id)
+            } else {
+              await supabase.from('variant_images').insert({
+                variant_id: variantId,
+                storage_path: img.storage_path,
+                alt_en: img.alt_en ?? null,
+                alt_el: img.alt_el ?? null,
+                sort_order: j,
+                is_primary: img.is_primary,
+              })
+            }
+          }
+        }
       }
 
-      // Save sizes
-      // Delete sizes not in the current list
+      // Save sizes (collected from all variants)
+      const allSizes = variants.flatMap((v) => v.sizes)
       if (product?.id) {
-        const keepSizeIds = sizes.filter((s) => s.id).map((s) => s.id!)
+        const keepSizeIds = allSizes.filter((s) => s.id).map((s) => s.id!)
         if (keepSizeIds.length > 0) {
           await supabase
             .from('product_sizes')
@@ -277,14 +317,14 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         }
       }
 
-      for (let i = 0; i < sizes.length; i++) {
-        const s = sizes[i]
+      let sizeIdx = 0
+      for (const s of allSizes) {
         const sizeData = {
           product_id: savedId,
           label_en: s.label_en,
           label_el: s.label_el,
           sku_suffix: s.sku_suffix || null,
-          sort_order: i,
+          sort_order: sizeIdx++,
         }
 
         if (s.id) {
@@ -315,9 +355,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         <Tabs defaultValue="basic">
           <TabsList>
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
-            <TabsTrigger value="images">Images</TabsTrigger>
-            <TabsTrigger value="variants">Color Variants</TabsTrigger>
-            <TabsTrigger value="sizes">Size Variants</TabsTrigger>
+            <TabsTrigger value="images">Variants &amp; Images</TabsTrigger>
           </TabsList>
 
           {/* Basic Info */}
@@ -562,30 +600,21 @@ export function ProductForm({ product, categories }: ProductFormProps) {
             </div>
           </TabsContent>
 
-          {/* Images */}
-          <TabsContent value="images" className="pt-5">
+          {/* Variants & Images */}
+          <TabsContent value="images" className="pt-5 space-y-8">
             <ImageUploader
               images={images}
               onChange={setImages}
               productId={product?.id ?? productId}
             />
-          </TabsContent>
 
-          {/* Variants */}
-          <TabsContent value="variants" className="pt-5">
-            <VariantEditor
-              variants={variants}
-              onChange={setVariants}
-              productId={product?.id ?? productId}
-            />
-          </TabsContent>
-
-          {/* Sizes */}
-          <TabsContent value="sizes" className="pt-5">
-            <SizeEditor
-              sizes={sizes}
-              onChange={setSizes}
-            />
+            <div className="border-t border-stone-200 pt-6">
+              <VariantEditor
+                variants={variants}
+                onChange={setVariants}
+                productId={product?.id ?? productId}
+              />
+            </div>
           </TabsContent>
         </Tabs>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -8,17 +8,19 @@ import { Separator } from '@/components/ui/separator'
 import { PriceBadge } from '@/components/shared/PriceBadge'
 import { TagList } from '@/components/shared/TagList'
 import { ProductImageGallery } from './ProductImageGallery'
-import { ColorVariantSelector } from './ColorVariantSelector'
 import { SizeVariantSelector } from './SizeVariantSelector'
 import { AddToCartButton } from './AddToCartButton'
 import { getLocalizedField, getLocalizedDescription } from '@/lib/types'
 import type { ProductWithImages, ProductVariantWithImages, ProductSize } from '@/lib/types'
-import { cn } from '@/lib/utils'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-
-function imgUrl(path: string) {
-  return `${SUPABASE_URL}/storage/v1/object/public/product-images/${path}`
+interface GalleryImageWithVariant {
+  id: string
+  storage_path: string
+  alt_en: string | null
+  alt_el: string | null
+  is_primary: boolean
+  sort_order: number
+  variantId?: string
 }
 
 interface ProductDetailProps {
@@ -30,12 +32,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const t = useTranslations('product')
   const ct = useTranslations('common')
 
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
   const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null)
-
-  const selectedVariant = selectedVariantId
-    ? (product.product_variants?.find((v) => v.id === selectedVariantId) as ProductVariantWithImages | undefined) ?? null
-    : null
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
 
   const selectedSize = selectedSizeId
     ? (product.product_sizes?.find((s) => s.id === selectedSizeId) as ProductSize | undefined) ?? null
@@ -44,15 +42,55 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const name = getLocalizedField(product, locale)
   const description = getLocalizedDescription(product, locale)
 
-  // Build gallery images: if variant with images is selected, show variant images; else product images
-  const galleryImages =
-    selectedVariant?.variant_type === 'image' &&
-    selectedVariant.variant_images?.length > 0
-      ? selectedVariant.variant_images.map((vi) => ({
-          ...vi,
-          sort_order: vi.sort_order,
-        }))
-      : (product.product_images ?? [])
+  // Build flat gallery: product images first, then each variant's images
+  const galleryImages = useMemo<GalleryImageWithVariant[]>(() => {
+    const images: GalleryImageWithVariant[] = []
+
+    // Product-level images
+    for (const img of product.product_images ?? []) {
+      images.push({ ...img, variantId: undefined })
+    }
+
+    // Variant images grouped by variant
+    const sortedVariants = [...(product.product_variants ?? [])].sort(
+      (a, b) => a.sort_order - b.sort_order
+    )
+    for (const variant of sortedVariants) {
+      const vi = (variant.variant_images ?? []).sort((a, b) => {
+        if (a.is_primary && !b.is_primary) return -1
+        if (!a.is_primary && b.is_primary) return 1
+        return a.sort_order - b.sort_order
+      })
+      for (const img of vi) {
+        images.push({ ...img, variantId: variant.id })
+      }
+    }
+
+    // If no images at all, return empty
+    if (images.length === 0) return images
+
+    // Put the product primary image first, keep rest in order
+    const primaryIdx = images.findIndex((i) => i.is_primary && !i.variantId)
+    if (primaryIdx > 0) {
+      const [primary] = images.splice(primaryIdx, 1)
+      images.unshift(primary)
+    }
+
+    return images
+  }, [product.product_images, product.product_variants])
+
+  // Derive selected variant from current gallery image
+  const selectedVariant = useMemo<ProductVariantWithImages | null>(() => {
+    if (galleryImages.length === 0) return null
+    const safeIdx = Math.min(activeImageIndex, galleryImages.length - 1)
+    const currentImage = galleryImages[safeIdx]
+    if (!currentImage?.variantId) return null
+    return (
+      (product.product_variants?.find(
+        (v) => v.id === currentImage.variantId
+      ) as ProductVariantWithImages | undefined) ?? null
+    )
+  }, [activeImageIndex, galleryImages, product.product_variants])
 
   const base = `/${locale}`
 
@@ -87,6 +125,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
             images={galleryImages}
             productName={name}
             locale={locale}
+            activeIndex={activeImageIndex}
+            onChangeIndex={setActiveImageIndex}
           />
         </div>
 
@@ -135,6 +175,26 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </div>
           )}
 
+          {/* Selected variant indicator */}
+          {selectedVariant && (
+            <div className="flex items-center gap-2 mb-4 text-sm">
+              <span className="text-slate-500">{t('colors')}:</span>
+              <div className="flex items-center gap-1.5">
+                {selectedVariant.hex_color && (
+                  <span
+                    className="h-4 w-4 rounded-full border border-slate-200"
+                    style={{ backgroundColor: selectedVariant.hex_color }}
+                  />
+                )}
+                <span className="text-slate-700 font-medium">
+                  {locale === 'el'
+                    ? selectedVariant.color_name_el
+                    : selectedVariant.color_name_en}
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Tags */}
           {product.tags.length > 0 && (
             <div className="mb-4">
@@ -143,20 +203,6 @@ export function ProductDetail({ product }: ProductDetailProps) {
           )}
 
           <Separator className="my-5" />
-
-          {/* Color variants */}
-          {(product.product_variants?.length ?? 0) > 0 && (
-            <>
-              <div className="mb-5">
-                <ColorVariantSelector
-                  variants={product.product_variants as ProductVariantWithImages[]}
-                  selectedVariantId={selectedVariantId}
-                  onSelect={setSelectedVariantId}
-                />
-              </div>
-              <Separator className="my-5" />
-            </>
-          )}
 
           {/* Size variants */}
           {(product.product_sizes?.length ?? 0) > 0 && (

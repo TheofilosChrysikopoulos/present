@@ -12,7 +12,7 @@ const PRODUCT_DETAIL_QUERY = `
   *,
   product_images (id, storage_path, alt_en, alt_el, sort_order, is_primary),
   product_variants (
-    id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, sort_order,
+    id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, is_primary, sort_order,
     variant_images (id, storage_path, alt_en, alt_el, sort_order, is_primary)
   ),
   product_sizes (id, label_en, label_el, sku_suffix, sort_order),
@@ -56,7 +56,9 @@ export async function getProducts(filters: ProductFilters = {}) {
     `id, sku, name_en, name_el, price, moq, category_id,
     tags, is_featured, is_new_arrival, is_active, sort_order, created_at, updated_at,
     product_images (id, storage_path, alt_en, alt_el, sort_order, is_primary),
-    product_variants (id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, sort_order),
+    product_variants (id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, is_primary, sort_order,
+      variant_images (id, storage_path, alt_en, alt_el, sort_order, is_primary)
+    ),
     categories (id, slug, name_en, name_el, parent_id, sort_order)`,
     { count: 'exact' }
   )
@@ -182,7 +184,7 @@ export async function getProductBySku(sku: string): Promise<ProductWithImages | 
       *,
       product_images (id, storage_path, alt_en, alt_el, sort_order, is_primary),
       product_variants (
-        id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, sort_order,
+        id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, is_primary, sort_order,
         variant_images (id, storage_path, alt_en, alt_el, sort_order, is_primary)
       ),
       product_sizes (id, label_en, label_el, sku_suffix, sort_order),
@@ -204,7 +206,7 @@ export async function getProductById(id: string): Promise<ProductWithImages | nu
       *,
       product_images (id, storage_path, alt_en, alt_el, sort_order, is_primary),
       product_variants (
-        id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, sort_order,
+        id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, is_primary, sort_order,
         variant_images (id, storage_path, alt_en, alt_el, sort_order, is_primary)
       ),
       product_sizes (id, label_en, label_el, sku_suffix, sort_order),

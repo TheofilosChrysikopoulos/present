@@ -1,9 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import type { ProductImage, VariantImage } from '@/lib/types'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
 
@@ -24,21 +22,19 @@ interface ProductImageGalleryProps {
   images: GalleryImage[]
   productName: string
   locale: string
+  activeIndex: number
+  onChangeIndex: (index: number) => void
 }
 
 export function ProductImageGallery({
   images,
   productName,
   locale,
+  activeIndex,
+  onChangeIndex,
 }: ProductImageGalleryProps) {
-  const sorted = [...images].sort((a, b) => {
-    if (a.is_primary && !b.is_primary) return -1
-    if (!a.is_primary && b.is_primary) return 1
-    return a.sort_order - b.sort_order
-  })
-
-  const [activeIndex, setActiveIndex] = useState(0)
-  const active = sorted[activeIndex]
+  const safeIndex = Math.min(activeIndex, Math.max(0, images.length - 1))
+  const active = images[safeIndex]
 
   if (!images.length) {
     return (
@@ -77,15 +73,15 @@ export function ProductImageGallery({
       </div>
 
       {/* Thumbnails */}
-      {sorted.length > 1 && (
-        <div className="flex gap-2 flex-wrap">
-          {sorted.map((img, i) => (
+      {images.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {images.map((img, i) => (
             <button
               key={img.id}
-              onClick={() => setActiveIndex(i)}
+              onClick={() => onChangeIndex(i)}
               className={cn(
                 'relative h-16 w-16 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all',
-                i === activeIndex
+                i === safeIndex
                   ? 'border-[#1e3a5f] opacity-100'
                   : 'border-slate-200 opacity-70 hover:opacity-100'
               )}

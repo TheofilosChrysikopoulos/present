@@ -63,6 +63,7 @@ export interface ProductVariant {
   color_name_el: string
   hex_color: string | null
   variant_type: 'swatch' | 'image'
+  is_primary: boolean
   sort_order: number
   created_at: string
 }
