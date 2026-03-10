@@ -11,17 +11,8 @@ import { ProductImageGallery } from './ProductImageGallery'
 import { SizeVariantSelector } from './SizeVariantSelector'
 import { AddToCartButton } from './AddToCartButton'
 import { getLocalizedField, getLocalizedDescription } from '@/lib/types'
+import { cn } from '@/lib/utils'
 import type { ProductWithImages, ProductVariantWithImages, ProductSize } from '@/lib/types'
-
-interface GalleryImageWithVariant {
-  id: string
-  storage_path: string
-  alt_en: string | null
-  alt_el: string | null
-  is_primary: boolean
-  sort_order: number
-  variantId?: string
-}
 
 interface ProductDetailProps {
   product: ProductWithImages
@@ -33,7 +24,6 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const ct = useTranslations('common')
 
   const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null)
-  const [activeImageIndex, setActiveImageIndex] = useState(0)
 
   const selectedSize = selectedSizeId
     ? (product.product_sizes?.find((s) => s.id === selectedSizeId) as ProductSize | undefined) ?? null
@@ -42,55 +32,48 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const name = getLocalizedField(product, locale)
   const description = getLocalizedDescription(product, locale)
 
-  // Build flat gallery: product images first, then each variant's images
-  const galleryImages = useMemo<GalleryImageWithVariant[]>(() => {
-    const images: GalleryImageWithVariant[] = []
+  // Sort variants by sort_order; find primary
+  const sortedVariants = useMemo(
+    () => [...(product.product_variants ?? [])].sort((a, b) => a.sort_order - b.sort_order),
+    [product.product_variants]
+  )
 
-    // Product-level images
-    for (const img of product.product_images ?? []) {
-      images.push({ ...img, variantId: undefined })
+  const defaultVariantIdx = useMemo(() => {
+    const primaryIdx = sortedVariants.findIndex((v) => v.is_primary)
+    return primaryIdx >= 0 ? primaryIdx : 0
+  }, [sortedVariants])
+
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(defaultVariantIdx)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
+
+  const selectedVariant = sortedVariants[selectedVariantIdx] as ProductVariantWithImages | undefined
+
+  // Images for the selected variant, primary first
+  const galleryImages = useMemo(() => {
+    if (!selectedVariant) {
+      // Fallback to product_images if no variants
+      return (product.product_images ?? []).map((img) => ({
+        ...img,
+        variantId: undefined as string | undefined,
+      }))
     }
 
-    // Variant images grouped by variant
-    const sortedVariants = [...(product.product_variants ?? [])].sort(
-      (a, b) => a.sort_order - b.sort_order
-    )
-    for (const variant of sortedVariants) {
-      const vi = (variant.variant_images ?? []).sort((a, b) => {
-        if (a.is_primary && !b.is_primary) return -1
-        if (!a.is_primary && b.is_primary) return 1
-        return a.sort_order - b.sort_order
-      })
-      for (const img of vi) {
-        images.push({ ...img, variantId: variant.id })
-      }
-    }
+    const vi = [...(selectedVariant.variant_images ?? [])].sort((a, b) => {
+      if (a.is_primary && !b.is_primary) return -1
+      if (!a.is_primary && b.is_primary) return 1
+      return a.sort_order - b.sort_order
+    })
 
-    // If no images at all, return empty
-    if (images.length === 0) return images
+    return vi.map((img) => ({
+      ...img,
+      variantId: selectedVariant.id,
+    }))
+  }, [selectedVariant, product.product_images])
 
-    // Put the product primary image first, keep rest in order
-    const primaryIdx = images.findIndex((i) => i.is_primary && !i.variantId)
-    if (primaryIdx > 0) {
-      const [primary] = images.splice(primaryIdx, 1)
-      images.unshift(primary)
-    }
-
-    return images
-  }, [product.product_images, product.product_variants])
-
-  // Derive selected variant from current gallery image
-  const selectedVariant = useMemo<ProductVariantWithImages | null>(() => {
-    if (galleryImages.length === 0) return null
-    const safeIdx = Math.min(activeImageIndex, galleryImages.length - 1)
-    const currentImage = galleryImages[safeIdx]
-    if (!currentImage?.variantId) return null
-    return (
-      (product.product_variants?.find(
-        (v) => v.id === currentImage.variantId
-      ) as ProductVariantWithImages | undefined) ?? null
-    )
-  }, [activeImageIndex, galleryImages, product.product_variants])
+  function selectVariant(idx: number) {
+    setSelectedVariantIdx(idx)
+    setActiveImageIndex(0)
+  }
 
   const base = `/${locale}`
 
@@ -119,7 +102,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-        {/* Image gallery */}
+        {/* Image gallery — shows selected variant's images */}
         <div>
           <ProductImageGallery
             images={galleryImages}
@@ -175,10 +158,43 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </div>
           )}
 
-          {/* Selected variant indicator */}
-          {selectedVariant && (
+          {/* Variant selector */}
+          {sortedVariants.length > 1 && (
+            <div className="mb-4">
+              <span className="text-sm text-slate-500 block mb-2">{t('variants')}:</span>
+              <div className="flex flex-wrap gap-2">
+                {sortedVariants.map((v, i) => {
+                  const isActive = i === selectedVariantIdx
+                  const variantName = locale === 'el' ? v.color_name_el : v.color_name_en
+                  return (
+                    <button
+                      key={v.id}
+                      onClick={() => selectVariant(i)}
+                      className={cn(
+                        'flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm transition-all',
+                        isActive
+                          ? 'border-[#1e3a5f] bg-[#1e3a5f]/5 text-[#1e3a5f] font-medium'
+                          : 'border-slate-200 text-slate-600 hover:border-slate-400'
+                      )}
+                    >
+                      {v.hex_color && (
+                        <span
+                          className="h-4 w-4 rounded-full border border-slate-200 flex-shrink-0"
+                          style={{ backgroundColor: v.hex_color }}
+                        />
+                      )}
+                      {variantName || `Variant ${i + 1}`}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Single variant indicator */}
+          {sortedVariants.length === 1 && selectedVariant && (
             <div className="flex items-center gap-2 mb-4 text-sm">
-              <span className="text-slate-500">{t('colors')}:</span>
+              <span className="text-slate-500">{t('variant')}:</span>
               <div className="flex items-center gap-1.5">
                 {selectedVariant.hex_color && (
                   <span
@@ -219,7 +235,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           )}
 
           {/* Add to cart */}
-          <AddToCartButton product={product} selectedVariant={selectedVariant} selectedSize={selectedSize} />
+          <AddToCartButton product={product} selectedVariant={selectedVariant ?? null} selectedSize={selectedSize} />
 
           {/* Description */}
           {description && (

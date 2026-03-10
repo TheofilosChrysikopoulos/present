@@ -29,6 +29,8 @@
     "tags": "Tags",
     "description": "Description",
     "colors": "Available Colors",
+    "variants": "Variants",
+    "variant": "Variant",
     "sizes": "Available Sizes",
     "quantity": "Quantity",
     "inCart": "In Cart",

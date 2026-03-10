@@ -41,6 +41,7 @@ interface ProductCardProps {
       color_name_en: string
       color_name_el: string
       variant_type: string
+      is_primary: boolean
       sort_order: number
       variant_images?: VariantImage[]
     }>
@@ -69,11 +70,16 @@ export function ProductCard({ product }: ProductCardProps) {
     [product.product_variants]
   )
 
-  // -1 = base product images, 0+ = variant index in variantsWithImages
-  const [selectedVariantIdx, setSelectedVariantIdx] = useState(-1)
+  // Default to primary variant (or first with images)
+  const defaultVariantIdx = useMemo(() => {
+    const primaryIdx = variantsWithImages.findIndex((v) => v.is_primary)
+    return primaryIdx >= 0 ? primaryIdx : variantsWithImages.length > 0 ? 0 : -1
+  }, [variantsWithImages])
+
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(defaultVariantIdx)
   const [imageIndex, setImageIndex] = useState(0)
 
-  // Current images: variant images if a variant with images is selected, else product images
+  // Current images: primary image of each variant for swiping, or selected variant's images
   const currentImages = useMemo(() => {
     if (selectedVariantIdx >= 0 && selectedVariantIdx < variantsWithImages.length) {
       const vi = variantsWithImages[selectedVariantIdx].variant_images ?? []
@@ -83,6 +89,7 @@ export function ProductCard({ product }: ProductCardProps) {
         return a.sort_order - b.sort_order
       })
     }
+    // Fallback to product_images if no variants
     return [...product.product_images].sort((a, b) => {
       if (a.is_primary && !b.is_primary) return -1
       if (!a.is_primary && b.is_primary) return 1
@@ -92,11 +99,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   function selectVariant(variantId: string) {
     const idx = variantsWithImages.findIndex((v) => v.id === variantId)
-    if (idx >= 0 && idx === selectedVariantIdx) {
-      // Deselect - go back to base product images
-      setSelectedVariantIdx(-1)
-      setImageIndex(0)
-    } else if (idx >= 0) {
+    if (idx >= 0) {
       setSelectedVariantIdx(idx)
       setImageIndex(0)
     }
