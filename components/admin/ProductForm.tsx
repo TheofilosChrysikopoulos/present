@@ -23,10 +23,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { ImageUploader, type UploadedImage } from './ImageUploader'
-import { VariantEditor, type VariantData, type SizeData } from './VariantEditor'
+import { VariantEditor, type VariantData, type SizeData, type UploadedImage } from './VariantEditor'
 import { createClient } from '@/lib/supabase/client'
-import { deleteStorageFile } from '@/lib/storage/uploadImage'
 import type { Category, ProductWithImages } from '@/lib/types'
 
 const productSchema = z.object({
@@ -57,29 +55,6 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const router = useRouter()
   const base = `/${locale}`
 
-  const [images, setImages] = useState<UploadedImage[]>(
-    product?.product_images?.map((img) => ({
-      id: img.id,
-      storage_path: img.storage_path,
-      alt_en: img.alt_en ?? undefined,
-      alt_el: img.alt_el ?? undefined,
-      sort_order: img.sort_order,
-      is_primary: img.is_primary,
-    })) ?? []
-  )
-
-  // Track the initial image list so we can detect removals on save
-  const [initialImages] = useState<UploadedImage[]>(
-    product?.product_images?.map((img) => ({
-      id: img.id,
-      storage_path: img.storage_path,
-      alt_en: img.alt_en ?? undefined,
-      alt_el: img.alt_el ?? undefined,
-      sort_order: img.sort_order,
-      is_primary: img.is_primary,
-    })) ?? []
-  )
-
   const [variants, setVariants] = useState<VariantData[]>(() => {
     const pvs = product?.product_variants ?? []
     const productSizes = (product?.product_sizes ?? []).map((s) => ({
@@ -92,6 +67,33 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     const primaryIdx = pvs.findIndex((v) => v.is_primary)
     const sizesOwner = primaryIdx >= 0 ? primaryIdx : 0
 
+    // Migrate legacy product_images into the first (or primary) variant
+    const legacyImages: UploadedImage[] = (product?.product_images ?? []).map((img) => ({
+      id: undefined, // these are product_image rows, they'll be saved as variant_images
+      storage_path: img.storage_path,
+      alt_en: img.alt_en ?? undefined,
+      alt_el: img.alt_el ?? undefined,
+      sort_order: img.sort_order,
+      is_primary: img.is_primary,
+    }))
+
+    if (pvs.length === 0 && legacyImages.length > 0) {
+      // No variants yet — create one to hold legacy product images
+      return [{
+        sku_suffix: '',
+        color_name_en: '',
+        color_name_el: '',
+        hex_color: '#e7e5e4',
+        variant_type: 'image' as const,
+        is_primary: true,
+        sort_order: 0,
+        images: legacyImages,
+        sizes: productSizes,
+      }]
+    }
+
+    const imagesOwner = primaryIdx >= 0 ? primaryIdx : 0
+
     return pvs.map((v, i) => ({
       id: v.id,
       sku_suffix: v.sku_suffix ?? '',
@@ -101,12 +103,16 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       variant_type: v.variant_type,
       is_primary: v.is_primary ?? false,
       sort_order: v.sort_order,
-      images: (v.variant_images ?? []).map((vi) => ({
-        id: vi.id,
-        storage_path: vi.storage_path,
-        sort_order: vi.sort_order,
-        is_primary: vi.is_primary,
-      })),
+      images: [
+        ...(v.variant_images ?? []).map((vi) => ({
+          id: vi.id,
+          storage_path: vi.storage_path,
+          sort_order: vi.sort_order,
+          is_primary: vi.is_primary,
+        })),
+        // Append legacy product images to the primary (or first) variant
+        ...(i === imagesOwner ? legacyImages : []),
+      ],
       sizes: i === sizesOwner ? productSizes : [],
     }))
   })
@@ -170,49 +176,12 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
       const savedId = savedProduct.id
 
-      // Save images — delete removed ones, update/insert remaining
+      // Delete all legacy product_images (now stored as variant_images)
       if (product?.id) {
-        const keepImageIds = images.filter((i) => i.id).map((i) => i.id!)
-        if (keepImageIds.length > 0) {
-          // Delete images that were removed from the list
-          await supabase
-            .from('product_images')
-            .delete()
-            .eq('product_id', savedId)
-            .not('id', 'in', `(${keepImageIds.map((id) => `'${id}'`).join(',')})`)
-        } else {
-          // All images removed — delete everything
-          await supabase
-            .from('product_images')
-            .delete()
-            .eq('product_id', savedId)
-        }
-      }
-
-      // Clean up storage files for removed images
-      const currentPaths = new Set(images.map((i) => i.storage_path))
-      const removedImages = initialImages.filter((i) => !currentPaths.has(i.storage_path))
-      for (const removed of removedImages) {
-        deleteStorageFile(removed.storage_path).catch(() => {})
-      }
-
-      for (let i = 0; i < images.length; i++) {
-        const img = images[i]
-        if (img.id) {
-          await supabase
-            .from('product_images')
-            .update({ sort_order: i, is_primary: img.is_primary })
-            .eq('id', img.id)
-        } else {
-          await supabase.from('product_images').insert({
-            product_id: savedId,
-            storage_path: img.storage_path,
-            alt_en: img.alt_en ?? null,
-            alt_el: img.alt_el ?? null,
-            sort_order: i,
-            is_primary: img.is_primary,
-          })
-        }
+        await supabase
+          .from('product_images')
+          .delete()
+          .eq('product_id', savedId)
       }
 
       // Save variants
@@ -363,7 +332,8 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           <TabsContent value="basic" className="space-y-5 pt-5">
             {/* Primary image preview */}
             {(() => {
-              const primaryImg = images.find((img) => img.is_primary) ?? images[0]
+              const primaryVariant = variants.find((v) => v.is_primary) ?? variants[0]
+              const primaryImg = primaryVariant?.images.find((img) => img.is_primary) ?? primaryVariant?.images[0]
               const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
               return primaryImg ? (
                 <div className="flex items-center gap-4 p-3 bg-stone-50 rounded-lg border border-stone-200">
@@ -602,20 +572,12 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           </TabsContent>
 
           {/* Variants & Images */}
-          <TabsContent value="images" className="pt-5 space-y-8">
-            <ImageUploader
-              images={images}
-              onChange={setImages}
+          <TabsContent value="images" className="pt-5">
+            <VariantEditor
+              variants={variants}
+              onChange={setVariants}
               productId={product?.id ?? productId}
             />
-
-            <div className="border-t border-stone-200 pt-6">
-              <VariantEditor
-                variants={variants}
-                onChange={setVariants}
-                productId={product?.id ?? productId}
-              />
-            </div>
           </TabsContent>
         </Tabs>
 
