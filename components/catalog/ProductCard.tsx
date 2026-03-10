@@ -2,12 +2,18 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useLocale, useTranslations } from 'next-intl'
 import { Badge } from '@/components/ui/badge'
 import { PriceBadge } from '@/components/shared/PriceBadge'
 import { QuickAddToCart } from './QuickAddToCart'
 import { CardImageGallery } from './CardImageGallery'
 import { cn } from '@/lib/utils'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+function imgUrl(path: string) {
+  return `${SUPABASE_URL}/storage/v1/object/public/product-images/${path}`
+}
 
 interface VariantImage {
   id: string
@@ -56,62 +62,89 @@ export function ProductCard({ product }: ProductCardProps) {
   const name = locale === 'el' ? product.name_el : product.name_en
   const href = `/${locale}/product/${product.sku}`
 
-  // Variants sorted by sort_order, only those with images
-  const variantsWithImages = useMemo(
+  // Variants sorted: primary first, then by sort_order
+  const sortedVariants = useMemo(
     () =>
-      (product.product_variants ?? [])
+      [...(product.product_variants ?? [])]
         .filter((v) => (v.variant_images?.length ?? 0) > 0)
-        .sort((a, b) => a.sort_order - b.sort_order),
+        .sort((a, b) => {
+          if (a.is_primary && !b.is_primary) return -1
+          if (!a.is_primary && b.is_primary) return 1
+          return a.sort_order - b.sort_order
+        }),
     [product.product_variants]
   )
 
-  const allSwatches = useMemo(
-    () => (product.product_variants ?? []).sort((a, b) => a.sort_order - b.sort_order).slice(0, 6),
-    [product.product_variants]
-  )
-
-  // Default to primary variant (or first with images)
-  const defaultVariantIdx = useMemo(() => {
-    const primaryIdx = variantsWithImages.findIndex((v) => v.is_primary)
-    return primaryIdx >= 0 ? primaryIdx : variantsWithImages.length > 0 ? 0 : -1
-  }, [variantsWithImages])
-
-  const [selectedVariantIdx, setSelectedVariantIdx] = useState(defaultVariantIdx)
+  // Default to primary variant (index 0 since sorted primary-first)
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0)
   const [imageIndex, setImageIndex] = useState(0)
 
-  // Current images: primary image of each variant for swiping, or selected variant's images
-  const currentImages = useMemo(() => {
-    if (selectedVariantIdx >= 0 && selectedVariantIdx < variantsWithImages.length) {
-      const vi = variantsWithImages[selectedVariantIdx].variant_images ?? []
-      return [...vi].sort((a, b) => {
+  // Images for the selected variant (primary image first), for the hero gallery
+  const heroImages = useMemo(() => {
+    if (sortedVariants.length === 0) {
+      return [...product.product_images].sort((a, b) => {
         if (a.is_primary && !b.is_primary) return -1
         if (!a.is_primary && b.is_primary) return 1
-        return a.sort_order - b.sort_order
+        return 0
       })
     }
-    // Fallback to product_images if no variants
-    return [...product.product_images].sort((a, b) => {
+    const vi = sortedVariants[selectedVariantIdx]?.variant_images ?? []
+    return [...vi].sort((a, b) => {
       if (a.is_primary && !b.is_primary) return -1
       if (!a.is_primary && b.is_primary) return 1
-      return 0
+      return a.sort_order - b.sort_order
     })
-  }, [selectedVariantIdx, variantsWithImages, product.product_images])
+  }, [sortedVariants, selectedVariantIdx, product.product_images])
 
-  function selectVariant(variantId: string) {
-    const idx = variantsWithImages.findIndex((v) => v.id === variantId)
-    if (idx >= 0) {
-      setSelectedVariantIdx(idx)
-      setImageIndex(0)
+  // Primary image per variant for the thumbnail grid
+  const variantThumbs = useMemo(
+    () =>
+      sortedVariants.map((v) => {
+        const imgs = [...(v.variant_images ?? [])].sort((a, b) => {
+          if (a.is_primary && !b.is_primary) return -1
+          if (!a.is_primary && b.is_primary) return 1
+          return a.sort_order - b.sort_order
+        })
+        return {
+          id: v.id,
+          storage_path: imgs[0]?.storage_path ?? '',
+          alt_en: imgs[0]?.alt_en ?? null,
+          alt_el: imgs[0]?.alt_el ?? null,
+        }
+      }),
+    [sortedVariants]
+  )
+
+  // Grid layout for variant thumbs
+  // ≤2 → all in one row; 3→2+1; 4→2+2; 5→3+2; 6→3+3; 7→4+3; 8→4+4; >8→rows of 4, scrollable
+  const thumbRows = useMemo(() => {
+    const n = variantThumbs.length
+    if (n <= 1) return [] // don't show grid for 0 or 1 variant
+    if (n <= 2) return [variantThumbs]
+    if (n <= 8) {
+      const topCount = Math.ceil(n / 2)
+      return [variantThumbs.slice(0, topCount), variantThumbs.slice(topCount)]
     }
+    // >8: rows of 4
+    const rows: typeof variantThumbs[] = []
+    for (let i = 0; i < n; i += 4) {
+      rows.push(variantThumbs.slice(i, i + 4))
+    }
+    return rows
+  }, [variantThumbs])
+
+  function selectVariant(idx: number) {
+    setSelectedVariantIdx(idx)
+    setImageIndex(0)
   }
 
   return (
     <div className="group flex flex-col bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-[#B13D82]/60 hover:shadow-lg transition-all duration-200 h-full">
       <Link href={href} className="flex-1 flex flex-col">
-        {/* Image gallery */}
+        {/* Hero image — primary variant, scrollable angles */}
         <div className="relative">
           <CardImageGallery
-            images={currentImages}
+            images={heroImages}
             productName={name}
             locale={locale}
             activeIndex={imageIndex}
@@ -126,15 +159,54 @@ export function ProductCard({ product }: ProductCardProps) {
               </Badge>
             )}
             {product.is_featured && (
-              <Badge
-                variant="secondary"
-                className="text-[10px] px-1.5 py-0.5 h-auto"
-              >
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 h-auto">
                 {ct('featured')}
               </Badge>
             )}
           </div>
         </div>
+
+        {/* Variant thumbnail grid */}
+        {thumbRows.length > 0 && (
+          <div
+            className={cn(
+              'bg-slate-50 border-t border-slate-100',
+              thumbRows.length > 2 && 'max-h-28 overflow-y-auto'
+            )}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+          >
+            {thumbRows.map((row, ri) => (
+              <div key={ri} className="flex">
+                {row.map((thumb, ti) => {
+                  const globalIdx = thumbRows.slice(0, ri).reduce((s, r) => s + r.length, 0) + ti
+                  const isActive = globalIdx === selectedVariantIdx
+                  return (
+                    <button
+                      key={thumb.id}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        selectVariant(globalIdx)
+                      }}
+                      className={cn(
+                        'relative flex-1 aspect-square border-r border-b border-slate-100 last:border-r-0 transition-all',
+                        isActive ? 'ring-2 ring-inset ring-[#1e3a5f]' : 'hover:bg-slate-100'
+                      )}
+                    >
+                      <Image
+                        src={imgUrl(thumb.storage_path)}
+                        alt={(locale === 'el' ? thumb.alt_el : thumb.alt_en) ?? name}
+                        fill
+                        sizes="80px"
+                        className="object-contain p-0.5"
+                      />
+                    </button>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Info */}
         <div className="p-3 pb-1 flex-1 flex flex-col">
@@ -152,48 +224,12 @@ export function ProductCard({ product }: ProductCardProps) {
             )}
           </div>
 
-          {/* Color swatches — interactive */}
-          {allSwatches.length > 0 && (
-            <div
-              className="mt-2 flex items-center gap-1"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
-            >
-              {allSwatches.map((v) => {
-                const isActive =
-                  selectedVariantIdx >= 0 &&
-                  variantsWithImages[selectedVariantIdx]?.id === v.id
-                return (
-                  <button
-                    key={v.id}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      selectVariant(v.id)
-                    }}
-                    className={cn(
-                      'h-4 w-4 rounded-full border flex-shrink-0 transition-all',
-                      isActive
-                        ? 'border-[#1e3a5f] ring-1 ring-[#1e3a5f]/40 scale-110'
-                        : 'border-slate-200 hover:scale-105'
-                    )}
-                    style={{ backgroundColor: v.hex_color ?? '#e7e5e4' }}
-                    title={locale === 'el' ? v.color_name_el : v.color_name_en}
-                  />
-                )
-              })}
-              {(product.product_variants?.length ?? 0) > 6 && (
-                <span className="text-[10px] text-slate-400">
-                  +{(product.product_variants?.length ?? 0) - 6}
-                </span>
-              )}
-            </div>
-          )}
           {/* Spacer to push add-to-cart down */}
           <div className="flex-1" />
         </div>
       </Link>
 
-      {/* Quick add-to-cart — qty (left) + cart icon (right) */}
+      {/* Quick add-to-cart */}
       <div className="px-3 pb-2.5 pt-0">
         <QuickAddToCart product={product} />
       </div>

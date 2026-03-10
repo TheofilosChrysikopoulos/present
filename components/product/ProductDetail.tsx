@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { PriceBadge } from '@/components/shared/PriceBadge'
@@ -158,32 +159,52 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </div>
           )}
 
-          {/* Variant selector */}
+          {/* Variant selector — primary image thumbnails */}
           {sortedVariants.length > 1 && (
             <div className="mb-4">
               <span className="text-sm text-slate-500 block mb-2">{t('variants')}:</span>
               <div className="flex flex-wrap gap-2">
                 {sortedVariants.map((v, i) => {
                   const isActive = i === selectedVariantIdx
+                  const vi = [...(v.variant_images ?? [])].sort((a, b) => {
+                    if (a.is_primary && !b.is_primary) return -1
+                    if (!a.is_primary && b.is_primary) return 1
+                    return a.sort_order - b.sort_order
+                  })
+                  const thumb = vi[0]
                   const variantName = locale === 'el' ? v.color_name_el : v.color_name_en
                   return (
                     <button
                       key={v.id}
                       onClick={() => selectVariant(i)}
                       className={cn(
-                        'flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm transition-all',
+                        'relative rounded-lg overflow-hidden border-2 transition-all flex-shrink-0',
                         isActive
-                          ? 'border-[#1e3a5f] bg-[#1e3a5f]/5 text-[#1e3a5f] font-medium'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-400'
+                          ? 'border-[#1e3a5f] ring-1 ring-[#1e3a5f]/30'
+                          : 'border-slate-200 hover:border-slate-400 opacity-75 hover:opacity-100'
                       )}
+                      title={variantName || `Variant ${i + 1}`}
                     >
-                      {v.hex_color && (
-                        <span
-                          className="h-4 w-4 rounded-full border border-slate-200 flex-shrink-0"
-                          style={{ backgroundColor: v.hex_color }}
-                        />
+                      {thumb ? (
+                        <div className="h-16 w-16 relative bg-white">
+                          <Image
+                            src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/${thumb.storage_path}`}
+                            alt={variantName || `Variant ${i + 1}`}
+                            fill
+                            sizes="64px"
+                            className="object-contain p-0.5"
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-16 w-16 bg-slate-100 flex items-center justify-center">
+                          {v.hex_color && (
+                            <span
+                              className="h-8 w-8 rounded-full border border-slate-200"
+                              style={{ backgroundColor: v.hex_color }}
+                            />
+                          )}
+                        </div>
                       )}
-                      {variantName || `Variant ${i + 1}`}
                     </button>
                   )
                 })}
