@@ -19,9 +19,27 @@ interface QuickAddToCartProps {
     moq: number
     product_images?: Array<{ storage_path: string; is_primary: boolean }>
   }
+  selectedSize?: {
+    id: string
+    label_en: string
+    label_el: string
+    sku_suffix: string | null
+    price: number | null
+    discount_price: number | null
+  } | null
+  selectedVariant?: {
+    id: string
+    sku_suffix: string | null
+    color_name_en: string
+    color_name_el: string
+    hex_color: string | null
+    variant_type: string
+    is_primary: boolean
+    variant_images?: Array<{ storage_path: string; is_primary: boolean }>
+  } | null
 }
 
-export function QuickAddToCart({ product }: QuickAddToCartProps) {
+export function QuickAddToCart({ product, selectedSize, selectedVariant }: QuickAddToCartProps) {
   const t = useTranslations('product')
   const locale = useLocale()
   const { addItem } = useCart()
@@ -50,20 +68,55 @@ export function QuickAddToCart({ product }: QuickAddToCartProps) {
     e.preventDefault()
     e.stopPropagation()
 
+    const variantInfo = selectedVariant
+      ? {
+          id: selectedVariant.id,
+          skuSuffix: selectedVariant.sku_suffix,
+          colorNameEn: selectedVariant.color_name_en,
+          colorNameEl: selectedVariant.color_name_el,
+          hexColor: selectedVariant.hex_color,
+          type: selectedVariant.variant_type as 'swatch' | 'image',
+          primaryImagePath:
+            selectedVariant.variant_images?.find((i) => i.is_primary)?.storage_path ??
+            selectedVariant.variant_images?.[0]?.storage_path ?? null,
+        }
+      : null
+
+    const sizeInfo = selectedSize
+      ? {
+          id: selectedSize.id,
+          labelEn: selectedSize.label_en,
+          labelEl: selectedSize.label_el,
+          skuSuffix: selectedSize.sku_suffix,
+        }
+      : null
+
+    let sku = product.sku
+    if (selectedVariant?.sku_suffix) sku += selectedVariant.sku_suffix
+    if (selectedSize?.sku_suffix) sku += ` ${selectedSize.sku_suffix}`
+
+    const effectivePrice = selectedSize?.price ?? product.price
+    const effectiveDiscountPrice = selectedSize ? selectedSize.discount_price : (product.discount_price ?? null)
+
+    const variantPrimaryImage =
+      selectedVariant?.variant_images?.find((i) => i.is_primary) ??
+      selectedVariant?.variant_images?.[0]
+
     addItem({
       productId: product.id,
-      sku: product.sku,
+      sku,
       nameEn: product.name_en,
       nameEl: product.name_el,
-      price: product.price,
-      discountPrice: product.discount_price ?? null,
+      price: effectivePrice,
+      discountPrice: effectiveDiscountPrice ?? null,
       moq: product.moq,
       qty,
-      variant: null,
-      size: null,
-      primaryImagePath: primaryImage?.storage_path ?? null,
-      variantId: undefined,
-      sizeId: undefined,
+      variant: variantInfo,
+      size: sizeInfo,
+      primaryImagePath:
+        variantPrimaryImage?.storage_path ?? primaryImage?.storage_path ?? null,
+      variantId: selectedVariant?.id,
+      sizeId: selectedSize?.id,
     })
 
     setJustAdded(true)

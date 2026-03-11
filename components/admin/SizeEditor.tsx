@@ -10,6 +10,8 @@ export interface SizeData {
   label_en: string
   label_el: string
   sku_suffix: string
+  price: string
+  discount_price: string
   sort_order: number
 }
 
@@ -22,6 +24,8 @@ const emptySize = (): SizeData => ({
   label_en: '',
   label_el: '',
   sku_suffix: '',
+  price: '',
+  discount_price: '',
   sort_order: 0,
 })
 
@@ -88,6 +92,34 @@ export function SizeEditor({ sizes, onChange }: SizeEditorProps) {
                 placeholder="-LG"
                 value={size.sku_suffix}
                 onChange={(e) => updateSize(i, { sku_suffix: e.target.value })}
+                className="mt-1 h-8 text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Price per size */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Price (€) *</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.00"
+                value={size.price}
+                onChange={(e) => updateSize(i, { price: e.target.value })}
+                className="mt-1 h-8 text-sm"
+              />
+            </div>
+            <div>
+              <Label className="text-xs">Sale Price (€)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Leave empty"
+                value={size.discount_price}
+                onChange={(e) => updateSize(i, { discount_price: e.target.value })}
                 className="mt-1 h-8 text-sm"
               />
             </div>

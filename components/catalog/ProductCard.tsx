@@ -52,6 +52,15 @@ interface ProductCardProps {
       sort_order: number
       variant_images?: VariantImage[]
     }>
+    product_sizes?: Array<{
+      id: string
+      label_en: string
+      label_el: string
+      sku_suffix: string | null
+      price: number | null
+      discount_price: number | null
+      sort_order: number
+    }>
   }
 }
 
@@ -79,6 +88,18 @@ export function ProductCard({ product }: ProductCardProps) {
   // Default to primary variant (index 0 since sorted primary-first)
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0)
   const [imageIndex, setImageIndex] = useState(0)
+
+  // Sizes sorted by sort_order, default to first
+  const sortedSizes = useMemo(
+    () => [...(product.product_sizes ?? [])].sort((a, b) => a.sort_order - b.sort_order),
+    [product.product_sizes]
+  )
+  const [selectedSizeIdx, setSelectedSizeIdx] = useState(0)
+  const selectedSize = sortedSizes[selectedSizeIdx] ?? null
+
+  // Effective price: from selected size if available, otherwise product level
+  const effectivePrice = selectedSize?.price ?? product.price
+  const effectiveDiscountPrice = selectedSize ? selectedSize.discount_price : (product.discount_price ?? null)
 
   // Images for the selected variant (primary image first), for the hero gallery
   const heroImages = useMemo(() => {
@@ -216,8 +237,35 @@ export function ProductCard({ product }: ProductCardProps) {
             {name}
           </h3>
 
+          {/* Size selector */}
+          {sortedSizes.length > 0 && (
+            <div
+              className="flex flex-wrap gap-1 mt-1.5"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
+            >
+              {sortedSizes.map((size, si) => (
+                <button
+                  key={size.id}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setSelectedSizeIdx(si)
+                  }}
+                  className={cn(
+                    'px-2 py-0.5 rounded border text-[11px] font-medium transition-all',
+                    si === selectedSizeIdx
+                      ? 'border-[#1e3a5f] bg-[#1e3a5f] text-white'
+                      : 'border-slate-200 text-slate-600 hover:border-slate-400'
+                  )}
+                >
+                  {size.sku_suffix || (locale === 'el' ? size.label_el : size.label_en)}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="mt-2 flex items-center justify-between gap-2">
-            <PriceBadge price={product.price} discountPrice={product.discount_price} size="sm" />
+            <PriceBadge price={effectivePrice} discountPrice={effectiveDiscountPrice} size="sm" />
             {product.moq > 1 && (
               <span className="text-[11px] text-slate-400">
                 {t('moqNote', { moq: product.moq })}
@@ -232,7 +280,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
       {/* Quick add-to-cart */}
       <div className="px-3 pb-2.5 pt-0">
-        <QuickAddToCart product={product} />
+        <QuickAddToCart product={product} selectedSize={selectedSize} selectedVariant={sortedVariants[selectedVariantIdx] ?? null} />
       </div>
     </div>
   )

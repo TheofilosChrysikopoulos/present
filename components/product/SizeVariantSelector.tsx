@@ -28,12 +28,12 @@ export function SizeVariantSelector({
       <div className="flex items-center gap-2 flex-wrap">
         {sorted.map((size) => {
           const isSelected = selectedSizeId === size.id
-          const label = locale === 'el' ? size.label_el : size.label_en
+          const label = size.sku_suffix || (locale === 'el' ? size.label_el : size.label_en)
 
           return (
             <button
               key={size.id}
-              onClick={() => onSelect(isSelected ? null : size.id)}
+              onClick={() => onSelect(size.id)}
               className={cn(
                 'px-3 py-1.5 rounded-lg border text-sm font-medium transition-all',
                 isSelected
@@ -41,7 +41,7 @@ export function SizeVariantSelector({
                   : 'border-slate-200 text-slate-700 hover:border-slate-400 hover:bg-slate-50'
               )}
               aria-pressed={isSelected}
-              aria-label={label}
+              aria-label={locale === 'el' ? size.label_el : size.label_en}
             >
               {label}
             </button>

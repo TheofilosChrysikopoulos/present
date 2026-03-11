@@ -24,11 +24,22 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const t = useTranslations('product')
   const ct = useTranslations('common')
 
-  const [selectedSizeId, setSelectedSizeId] = useState<string | null>(null)
+  // Sort sizes and default to first one
+  const sortedSizes = useMemo(
+    () => [...(product.product_sizes ?? [])].sort((a, b) => a.sort_order - b.sort_order),
+    [product.product_sizes]
+  )
+  const [selectedSizeId, setSelectedSizeId] = useState<string | null>(
+    sortedSizes[0]?.id ?? null
+  )
 
   const selectedSize = selectedSizeId
-    ? (product.product_sizes?.find((s) => s.id === selectedSizeId) as ProductSize | undefined) ?? null
+    ? (sortedSizes.find((s) => s.id === selectedSizeId) as ProductSize | undefined) ?? null
     : null
+
+  // Effective price: from selected size if it has a price, otherwise product level
+  const effectivePrice = selectedSize?.price ?? product.price
+  const effectiveDiscountPrice = selectedSize ? selectedSize.discount_price : (product.discount_price ?? null)
 
   const name = getLocalizedField(product, locale)
   const description = getLocalizedDescription(product, locale)
@@ -134,11 +145,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
           <p className="text-sm text-slate-400 font-mono mb-4">
             {t('sku')}: {product.sku}
             {selectedVariant?.sku_suffix && selectedVariant.sku_suffix}
+            {selectedSize?.sku_suffix && ` ${selectedSize.sku_suffix}`}
           </p>
 
           {/* Price and MOQ */}
           <div className="flex items-baseline gap-3 mb-4">
-            <PriceBadge price={product.price} discountPrice={product.discount_price} size="lg" />
+            <PriceBadge price={effectivePrice} discountPrice={effectiveDiscountPrice} size="lg" />
             {product.moq > 1 && (
               <span className="text-sm text-slate-500">
                 {t('moqNote', { moq: product.moq })}
@@ -212,25 +224,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             </div>
           )}
 
-          {/* Single variant indicator */}
-          {sortedVariants.length === 1 && selectedVariant && (
-            <div className="flex items-center gap-2 mb-4 text-sm">
-              <span className="text-slate-500">{t('variant')}:</span>
-              <div className="flex items-center gap-1.5">
-                {selectedVariant.hex_color && (
-                  <span
-                    className="h-4 w-4 rounded-full border border-slate-200"
-                    style={{ backgroundColor: selectedVariant.hex_color }}
-                  />
-                )}
-                <span className="text-slate-700 font-medium">
-                  {locale === 'el'
-                    ? selectedVariant.color_name_el
-                    : selectedVariant.color_name_en}
-                </span>
-              </div>
-            </div>
-          )}
+
 
           {/* Tags */}
           {product.tags.length > 0 && (

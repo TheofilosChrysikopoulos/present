@@ -124,15 +124,19 @@ export function AddToCartButton({
 
     let sku = product.sku
     if (selectedVariant?.sku_suffix) sku += selectedVariant.sku_suffix
-    if (selectedSize?.sku_suffix) sku += selectedSize.sku_suffix
+    if (selectedSize?.sku_suffix) sku += ` ${selectedSize.sku_suffix}`
+
+    // Use size-specific pricing when available, otherwise product-level pricing
+    const effectivePrice = selectedSize?.price ?? product.price
+    const effectiveDiscountPrice = selectedSize ? selectedSize.discount_price : (product.discount_price ?? null)
 
     addItem({
       productId: product.id,
       sku,
       nameEn: product.name_en,
       nameEl: product.name_el,
-      price: product.price,
-      discountPrice: product.discount_price ?? null,
+      price: effectivePrice,
+      discountPrice: effectiveDiscountPrice ?? null,
       moq: product.moq,
       qty,
       variant: variantInfo,

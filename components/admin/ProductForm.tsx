@@ -23,7 +23,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { VariantEditor, type VariantData, type SizeData, type UploadedImage } from './VariantEditor'
+import { VariantEditor, type VariantData, type UploadedImage } from './VariantEditor'
+import { SizeEditor, type SizeData } from './SizeEditor'
 import { createClient } from '@/lib/supabase/client'
 import type { Category, ProductWithImages } from '@/lib/types'
 
@@ -59,17 +60,20 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const router = useRouter()
   const base = `/${locale}`
 
-  const [variants, setVariants] = useState<VariantData[]>(() => {
-    const pvs = product?.product_variants ?? []
-    const productSizes = (product?.product_sizes ?? []).map((s) => ({
+  const [sizes, setSizes] = useState<SizeData[]>(() =>
+    (product?.product_sizes ?? []).map((s) => ({
       id: s.id,
       label_en: s.label_en,
       label_el: s.label_el,
       sku_suffix: s.sku_suffix ?? '',
+      price: s.price?.toString() ?? '',
+      discount_price: s.discount_price?.toString() ?? '',
       sort_order: s.sort_order,
     }))
-    const primaryIdx = pvs.findIndex((v) => v.is_primary)
-    const sizesOwner = primaryIdx >= 0 ? primaryIdx : 0
+  )
+
+  const [variants, setVariants] = useState<VariantData[]>(() => {
+    const pvs = product?.product_variants ?? []
 
     // Migrate legacy product_images into the first (or primary) variant
     const legacyImages: UploadedImage[] = (product?.product_images ?? []).map((img) => ({
@@ -92,10 +96,10 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         is_primary: true,
         sort_order: 0,
         images: legacyImages,
-        sizes: productSizes,
       }]
     }
 
+    const primaryIdx = pvs.findIndex((v) => v.is_primary)
     const imagesOwner = primaryIdx >= 0 ? primaryIdx : 0
 
     return pvs.map((v, i) => ({
@@ -117,7 +121,6 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         // Append legacy product images to the primary (or first) variant
         ...(i === imagesOwner ? legacyImages : []),
       ],
-      sizes: i === sizesOwner ? productSizes : [],
     }))
   })
 
@@ -199,7 +202,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
             .from('product_variants')
             .delete()
             .eq('product_id', savedId)
-            .not('id', 'in', `(${keepIds.map((id) => `'${id}'`).join(',')})`)
+            .not('id', 'in', `(${keepIds.join(',')})`)
         } else {
           await supabase
             .from('product_variants')
@@ -246,7 +249,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
               .from('variant_images')
               .delete()
               .eq('variant_id', variantId)
-              .not('id', 'in', `(${keepImgIds.map((id) => `'${id}'`).join(',')})`)
+              .not('id', 'in', `(${keepImgIds.join(',')})`)
           } else if (product?.id) {
             await supabase
               .from('variant_images')
@@ -275,16 +278,15 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         }
       }
 
-      // Save sizes (collected from all variants)
-      const allSizes = variants.flatMap((v) => v.sizes)
+      // Save sizes (product-level)
       if (product?.id) {
-        const keepSizeIds = allSizes.filter((s) => s.id).map((s) => s.id!)
+        const keepSizeIds = sizes.filter((s) => s.id).map((s) => s.id!)
         if (keepSizeIds.length > 0) {
           await supabase
             .from('product_sizes')
             .delete()
             .eq('product_id', savedId)
-            .not('id', 'in', `(${keepSizeIds.map((id) => `'${id}'`).join(',')})`)
+            .not('id', 'in', `(${keepSizeIds.join(',')})`)
         } else {
           await supabase
             .from('product_sizes')
@@ -294,12 +296,14 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       }
 
       let sizeIdx = 0
-      for (const s of allSizes) {
+      for (const s of sizes) {
         const sizeData = {
           product_id: savedId,
           label_en: s.label_en,
           label_el: s.label_el,
           sku_suffix: s.sku_suffix || null,
+          price: s.price ? parseFloat(s.price) : null,
+          discount_price: s.discount_price ? parseFloat(s.discount_price) : null,
           sort_order: sizeIdx++,
         }
 
@@ -591,12 +595,18 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           </TabsContent>
 
           {/* Variants & Images */}
-          <TabsContent value="images" className="pt-5">
+          <TabsContent value="images" className="pt-5 space-y-6">
             <VariantEditor
               variants={variants}
               onChange={setVariants}
               productId={product?.id ?? productId}
             />
+
+            {/* Product-level sizes */}
+            <div className="border border-stone-200 rounded-xl p-4 bg-stone-50">
+              <Label className="text-sm font-medium mb-3 block">Product Sizes</Label>
+              <SizeEditor sizes={sizes} onChange={setSizes} />
+            </div>
           </TabsContent>
         </Tabs>
 

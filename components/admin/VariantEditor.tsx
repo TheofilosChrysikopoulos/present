@@ -7,7 +7,6 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
 import { uploadVariantImage } from '@/lib/storage/uploadImage'
 import { cn } from '@/lib/utils'
 
@@ -25,14 +24,6 @@ export type UploadedImage = {
   is_primary: boolean
 }
 
-export interface SizeData {
-  id?: string
-  label_en: string
-  label_el: string
-  sku_suffix: string
-  sort_order: number
-}
-
 export interface VariantData {
   id?: string
   sku_suffix: string
@@ -43,7 +34,6 @@ export interface VariantData {
   is_primary: boolean
   sort_order: number
   images: UploadedImage[]
-  sizes: SizeData[]
 }
 
 interface VariantEditorProps {
@@ -61,14 +51,6 @@ const emptyVariant = (): VariantData => ({
   is_primary: false,
   sort_order: 0,
   images: [],
-  sizes: [],
-})
-
-const emptySize = (): SizeData => ({
-  label_en: '',
-  label_el: '',
-  sku_suffix: '',
-  sort_order: 0,
 })
 
 /* ── Drag source identifier ─────────────────── */
@@ -115,27 +97,6 @@ export function VariantEditor({
 
   function setPrimary(index: number) {
     onChange(variants.map((v, i) => ({ ...v, is_primary: i === index })))
-  }
-
-  /* ── Size helpers ─────────────────── */
-
-  function addSize(variantIdx: number) {
-    const v = variants[variantIdx]
-    updateVariant(variantIdx, {
-      sizes: [...v.sizes, { ...emptySize(), sort_order: v.sizes.length }],
-    })
-  }
-
-  function removeSize(variantIdx: number, sizeIdx: number) {
-    const v = variants[variantIdx]
-    updateVariant(variantIdx, { sizes: v.sizes.filter((_, i) => i !== sizeIdx) })
-  }
-
-  function updateSize(variantIdx: number, sizeIdx: number, updates: Partial<SizeData>) {
-    const v = variants[variantIdx]
-    updateVariant(variantIdx, {
-      sizes: v.sizes.map((s, i) => (i === sizeIdx ? { ...s, ...updates } : s)),
-    })
   }
 
   /* ── Image primary / remove ─────── */
@@ -244,9 +205,6 @@ export function VariantEditor({
           onDragOver={handleDragOver}
           onDragEnter={() => setDropTarget(i)}
           onDragLeave={() => setDropTarget((cur) => (cur === i ? null : cur))}
-          addSize={() => addSize(i)}
-          removeSize={(si) => removeSize(i, si)}
-          updateSize={(si, u) => updateSize(i, si, u)}
         />
       ))}
 
@@ -302,9 +260,6 @@ interface VariantCardProps {
   onDragOver: (e: React.DragEvent) => void
   onDragEnter: () => void
   onDragLeave: () => void
-  addSize: () => void
-  removeSize: (si: number) => void
-  updateSize: (si: number, u: Partial<SizeData>) => void
 }
 
 function VariantCard({
@@ -324,9 +279,6 @@ function VariantCard({
   onDragOver,
   onDragEnter,
   onDragLeave,
-  addSize,
-  removeSize,
-  updateSize,
 }: VariantCardProps) {
   const [uploading, setUploading] = useState(false)
 
@@ -394,7 +346,6 @@ function VariantCard({
             )}
             <span className="text-xs text-stone-400">
               {variant.images.length} img{variant.images.length !== 1 ? 's' : ''}
-              {variant.sizes.length > 0 && ` · ${variant.sizes.length} size${variant.sizes.length !== 1 ? 's' : ''}`}
             </span>
           </div>
         </div>
@@ -525,30 +476,6 @@ function VariantCard({
                 Save the product first to upload images for this variant.
               </p>
             )}
-          </div>
-
-          {/* ── Sizes (optional) ── */}
-          <div>
-            <Separator className="my-2" />
-            <Label className="text-xs mb-2 block">Sizes (optional)</Label>
-            {variant.sizes.length > 0 && (
-              <div className="space-y-2 mb-2">
-                {variant.sizes.map((size, si) => (
-                  <div key={si} className="flex items-center gap-2 bg-white border border-stone-200 rounded-lg p-2">
-                    <Input placeholder="EN label" value={size.label_en} onChange={(e) => updateSize(si, { label_en: e.target.value })} className="h-7 text-xs flex-1" />
-                    <Input placeholder="EL label" value={size.label_el} onChange={(e) => updateSize(si, { label_el: e.target.value })} className="h-7 text-xs flex-1" />
-                    <Input placeholder="SKU" value={size.sku_suffix} onChange={(e) => updateSize(si, { sku_suffix: e.target.value })} className="h-7 text-xs w-20 font-mono" />
-                    <button type="button" onClick={() => removeSize(si)} className="text-stone-400 hover:text-red-500 transition-colors flex-shrink-0">
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <Button type="button" variant="outline" size="sm" onClick={addSize} className="gap-1 h-7 text-xs">
-              <Plus className="h-3 w-3" />
-              Add Size
-            </Button>
           </div>
         </div>
       )}

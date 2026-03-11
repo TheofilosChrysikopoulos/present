@@ -86,6 +86,8 @@ export interface ProductSize {
   label_en: string
   label_el: string
   sku_suffix: string | null
+  price: number | null
+  discount_price: number | null
   sort_order: number
   created_at: string
 }
