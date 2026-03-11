@@ -44,6 +44,7 @@ interface ProductCardProps {
     }>
     product_variants?: Array<{
       id: string
+      sku_suffix: string | null
       hex_color: string | null
       color_name_en: string
       color_name_el: string
