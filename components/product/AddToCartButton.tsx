@@ -20,6 +20,7 @@ interface AddToCartButtonProps {
     price: number
     discount_price?: number | null
     moq: number
+    sellable_variants?: boolean
     product_images?: Array<{ storage_path: string; is_primary: boolean }>
   }
   selectedVariant?: ProductVariantWithImages | null
@@ -100,7 +101,8 @@ export function AddToCartButton({
     selectedVariant?.variant_images?.[0]
 
   function handleAdd() {
-    const variantInfo = selectedVariant
+    const sellable = product.sellable_variants !== false
+    const variantInfo = selectedVariant && sellable
       ? {
           id: selectedVariant.id,
           skuSuffix: selectedVariant.sku_suffix,
@@ -123,7 +125,7 @@ export function AddToCartButton({
       : null
 
     let sku = product.sku
-    if (selectedVariant?.sku_suffix) sku += selectedVariant.sku_suffix
+    if (sellable && selectedVariant?.sku_suffix) sku += selectedVariant.sku_suffix
     if (selectedSize?.sku_suffix) sku += ` ${selectedSize.sku_suffix}`
 
     // Use size-specific pricing when available, otherwise product-level pricing
@@ -142,8 +144,8 @@ export function AddToCartButton({
       variant: variantInfo,
       size: sizeInfo,
       primaryImagePath:
-        variantPrimaryImage?.storage_path ?? primaryImage?.storage_path ?? null,
-      variantId,
+        (sellable ? variantPrimaryImage?.storage_path : null) ?? primaryImage?.storage_path ?? null,
+      variantId: sellable ? variantId : undefined,
       sizeId,
     })
 

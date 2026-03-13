@@ -1,8 +1,11 @@
 import { Suspense } from 'react'
 import { getTranslations, getLocale } from 'next-intl/server'
 import type { Metadata } from 'next'
+
+export const dynamic = 'force-dynamic'
 import { getProducts } from '@/lib/queries/products'
 import { getCategoryTree } from '@/lib/queries/categories'
+import { getShowSubcategories } from '@/lib/queries/settings'
 import { ProductGrid, ProductGridSkeleton } from '@/components/catalog/ProductGrid'
 import { ProductFilters } from '@/components/catalog/ProductFilters'
 import { ProductSearch } from '@/components/catalog/ProductSearch'
@@ -29,10 +32,11 @@ interface CatalogPageProps {
 
 export default async function CatalogPage({ searchParams }: CatalogPageProps) {
   const params = await searchParams
-  const [t, locale, tree] = await Promise.all([
+  const [t, locale, tree, showSubcategories] = await Promise.all([
     getTranslations('catalog'),
     getLocale(),
     getCategoryTree(),
+    getShowSubcategories(),
   ])
 
   const tags = params.tag
@@ -82,7 +86,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
         {/* Filters sidebar */}
         <div className="hidden lg:block w-52 flex-shrink-0">
           <Suspense>
-            <ProductFilters tree={tree} />
+            <ProductFilters tree={tree} showSubcategories={showSubcategories} />
           </Suspense>
         </div>
 

@@ -266,6 +266,14 @@ export function ProductDetail({ product }: ProductDetailProps) {
               </div>
             </>
           )}
+
+          {/* Company */}
+          {product.company && (
+            <div className="mt-4">
+              <span className="text-sm text-slate-500">{t('company')}:</span>{' '}
+              <span className="text-sm font-medium text-slate-700">{product.company}</span>
+            </div>
+          )}
         </div>
       </div>
     </div>

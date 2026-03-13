@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { CategoryMenu } from './CategoryMenu'
 import type { CategoryWithChildren } from '@/lib/types'
 
-export function MobileNav({ tree }: { tree: CategoryWithChildren[] }) {
+export function MobileNav({ tree, showSubcategories = true }: { tree: CategoryWithChildren[]; showSubcategories?: boolean }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -32,6 +32,7 @@ export function MobileNav({ tree }: { tree: CategoryWithChildren[] }) {
           <CategoryMenu
             tree={tree}
             variant="mobile"
+            showSubcategories={showSubcategories}
             onClose={() => setOpen(false)}
           />
         </SheetContent>

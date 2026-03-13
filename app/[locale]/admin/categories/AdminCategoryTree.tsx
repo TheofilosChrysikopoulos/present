@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
+import { Plus, Pencil, Trash2, ChevronDown, ChevronRight, Eye, EyeOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils'
 
 interface AdminCategoryTreeProps {
   tree: CategoryWithChildren[]
+  showSubcategories: boolean
 }
 
 interface CategoryDialogState {
@@ -25,8 +26,10 @@ interface CategoryDialogState {
   category?: CategoryWithChildren
 }
 
-export function AdminCategoryTree({ tree }: AdminCategoryTreeProps) {
+export function AdminCategoryTree({ tree, showSubcategories: initialShowSub }: AdminCategoryTreeProps) {
   const router = useRouter()
+  const [showSub, setShowSub] = useState(initialShowSub)
+  const [togglingSubcategories, setTogglingSubcategories] = useState(false)
   const [dialog, setDialog] = useState<CategoryDialogState>({
     open: false,
     mode: 'create',
@@ -113,9 +116,38 @@ export function AdminCategoryTree({ tree }: AdminCategoryTreeProps) {
     }
   }
 
+  async function toggleSubcategories() {
+    setTogglingSubcategories(true)
+    try {
+      const supabase = createClient()
+      const newValue = !showSub
+      const { error } = await supabase
+        .from('site_settings')
+        .upsert({ key: 'show_subcategories', value: newValue, updated_at: new Date().toISOString() })
+      if (error) throw error
+      setShowSub(newValue)
+      toast.success(newValue ? 'Subcategories visible' : 'Subcategories hidden')
+      router.refresh()
+    } catch (err: any) {
+      toast.error(err.message ?? 'Failed to update setting')
+    } finally {
+      setTogglingSubcategories(false)
+    }
+  }
+
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-between mb-4">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-2"
+          onClick={toggleSubcategories}
+          disabled={togglingSubcategories}
+        >
+          {showSub ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          {showSub ? 'Subcategories Visible' : 'Subcategories Hidden'}
+        </Button>
         <Button onClick={() => openCreate()} size="sm" className="gap-2">
           <Plus className="h-4 w-4" />
           Add Root Category

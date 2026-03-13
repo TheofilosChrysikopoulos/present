@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { Menu } from 'lucide-react'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { getCategoryTree } from '@/lib/queries/categories'
+import { getShowSubcategories } from '@/lib/queries/settings'
 import { CategoryMenu } from './CategoryMenu'
 import { LanguageToggle } from './LanguageToggle'
 import { CartIcon } from './CartIcon'
@@ -10,10 +11,11 @@ import { UserMenu } from './UserMenu'
 import { MobileNav } from './MobileNav'
 
 export async function Navbar() {
-  const [locale, t, tree] = await Promise.all([
+  const [locale, t, tree, showSubcategories] = await Promise.all([
     getLocale(),
     getTranslations('nav'),
     getCategoryTree(),
+    getShowSubcategories(),
   ])
 
   const homeHref = `/${locale}`
@@ -47,7 +49,7 @@ export async function Navbar() {
 
           {/* Desktop category navigation */}
           <div className="flex-1 hidden lg:flex">
-            <CategoryMenu tree={tree} variant="desktop" />
+            <CategoryMenu tree={tree} variant="desktop" showSubcategories={showSubcategories} />
           </div>
 
           {/* Right actions */}
@@ -56,7 +58,7 @@ export async function Navbar() {
             <UserMenu />
             <CartIcon />
             {/* Mobile menu trigger */}
-            <MobileNav tree={tree} />
+            <MobileNav tree={tree} showSubcategories={showSubcategories} />
           </div>
         </div>
       </div>

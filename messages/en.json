@@ -37,7 +37,8 @@
     "inCart": "In Cart",
     "relatedProducts": "Related Products",
     "notFound": "Product not found",
-    "noDescription": "No description available."
+    "noDescription": "No description available.",
+    "company": "Company"
   },
   "catalog": {
     "title": "Product Catalog",

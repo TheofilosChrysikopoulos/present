@@ -30,9 +30,13 @@ interface ProductCardProps {
     sku: string
     name_en: string
     name_el: string
+    description_en?: string | null
+    description_el?: string | null
     price: number
     discount_price?: number | null
     moq: number
+    company?: string
+    sellable_variants?: boolean
     is_featured: boolean
     is_new_arrival: boolean
     tags: string[]
@@ -72,6 +76,12 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const name = locale === 'el' ? product.name_el : product.name_en
   const href = `/${locale}/product/${product.sku}`
+
+  // First line of description for the card
+  const description = locale === 'el' ? product.description_el : product.description_en
+  const firstDescLine = description
+    ? description.split('\n').filter(Boolean)[0]?.trim() || null
+    : null
 
   // Variants sorted: primary first, then by sort_order
   const sortedVariants = useMemo(
@@ -138,22 +148,13 @@ export function ProductCard({ product }: ProductCardProps) {
     [sortedVariants]
   )
 
-  // Grid layout for variant thumbs
-  // ≤2 → all in one row; 3→2+1; 4→2+2; 5→3+2; 6→3+3; 7→4+3; 8→4+4; >8→rows of 4, scrollable
-  const thumbRows = useMemo(() => {
+  // Number of columns for the variant thumbnail grid
+  const thumbCols = useMemo(() => {
     const n = variantThumbs.length
-    if (n <= 1) return [] // don't show grid for 0 or 1 variant
-    if (n <= 2) return [variantThumbs]
-    if (n <= 8) {
-      const topCount = Math.ceil(n / 2)
-      return [variantThumbs.slice(0, topCount), variantThumbs.slice(topCount)]
-    }
-    // >8: rows of 4
-    const rows: typeof variantThumbs[] = []
-    for (let i = 0; i < n; i += 4) {
-      rows.push(variantThumbs.slice(i, i + 4))
-    }
-    return rows
+    if (n <= 1) return 0
+    if (n <= 4) return 2
+    if (n <= 6) return 3
+    return 4
   }, [variantThumbs])
 
   function selectVariant(idx: number) {
@@ -190,44 +191,42 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Variant thumbnail grid */}
-        {thumbRows.length > 0 && (
+        {thumbCols > 0 && (
           <div
             className={cn(
-              'bg-slate-50 border-t border-slate-100',
-              thumbRows.length > 2 && 'max-h-28 overflow-y-auto'
+              'bg-slate-50 border-t border-slate-100 grid',
+              thumbCols === 2 && 'grid-cols-2',
+              thumbCols === 3 && 'grid-cols-3',
+              thumbCols === 4 && 'grid-cols-4',
+              variantThumbs.length > 8 && 'max-h-28 overflow-y-auto'
             )}
             onClick={(e) => { e.preventDefault(); e.stopPropagation() }}
           >
-            {thumbRows.map((row, ri) => (
-              <div key={ri} className="flex">
-                {row.map((thumb, ti) => {
-                  const globalIdx = thumbRows.slice(0, ri).reduce((s, r) => s + r.length, 0) + ti
-                  const isActive = globalIdx === selectedVariantIdx
-                  return (
-                    <button
-                      key={thumb.id}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        selectVariant(globalIdx)
-                      }}
-                      className={cn(
-                        'relative flex-1 aspect-square border-r border-b border-slate-100 last:border-r-0 transition-all',
-                        isActive ? 'ring-2 ring-inset ring-[#1e3a5f]' : 'hover:bg-slate-100'
-                      )}
-                    >
-                      <Image
-                        src={imgUrl(thumb.storage_path)}
-                        alt={(locale === 'el' ? thumb.alt_el : thumb.alt_en) ?? name}
-                        fill
-                        sizes="80px"
-                        className="object-contain p-0.5"
-                      />
-                    </button>
-                  )
-                })}
-              </div>
-            ))}
+            {variantThumbs.map((thumb, idx) => {
+              const isActive = idx === selectedVariantIdx
+              return (
+                <button
+                  key={thumb.id}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    selectVariant(idx)
+                  }}
+                  className={cn(
+                    'relative aspect-square border-r border-b border-slate-100 transition-all',
+                    isActive ? 'ring-2 ring-inset ring-[#1e3a5f]' : 'hover:bg-slate-100'
+                  )}
+                >
+                  <Image
+                    src={imgUrl(thumb.storage_path)}
+                    alt={(locale === 'el' ? thumb.alt_el : thumb.alt_en) ?? name}
+                    fill
+                    sizes="80px"
+                    className="object-contain p-0.5"
+                  />
+                </button>
+              )
+            })}
           </div>
         )}
 
@@ -237,6 +236,10 @@ export function ProductCard({ product }: ProductCardProps) {
           <h3 className="text-sm font-medium text-[#1e3a5f] line-clamp-2 leading-snug">
             {name}
           </h3>
+
+          {firstDescLine && (
+            <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">{firstDescLine}</p>
+          )}
 
           {/* Size selector */}
           {sortedSizes.length > 0 && (
@@ -276,6 +279,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Spacer to push add-to-cart down */}
           <div className="flex-1" />
+
+          {/* Company */}
+          {product.company && (
+            <p className="text-[11px] text-slate-400 italic mt-1">{product.company}</p>
+          )}
         </div>
       </Link>
 

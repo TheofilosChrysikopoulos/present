@@ -53,8 +53,9 @@ export async function getProducts(filters: ProductFilters = {}) {
   } = filters
 
   let query = supabase.from('products').select(
-    `id, sku, name_en, name_el, price, discount_price, moq, category_id,
+    `id, sku, name_en, name_el, description_en, description_el, price, discount_price, moq, category_id,
     tags, is_featured, is_new_arrival, is_active, sort_order, created_at, updated_at,
+    company, sellable_variants, region,
     product_images (id, storage_path, alt_en, alt_el, sort_order, is_primary),
     product_variants (id, sku_suffix, color_name_en, color_name_el, hex_color, variant_type, is_primary, sort_order,
       variant_images (id, storage_path, alt_en, alt_el, sort_order, is_primary)

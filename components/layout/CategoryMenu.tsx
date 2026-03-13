@@ -3,8 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import { ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronDown, Grid3X3 } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
 import type { CategoryWithChildren } from '@/lib/types'
 import { getLocalizedField } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -12,10 +12,11 @@ import { cn } from '@/lib/utils'
 interface CategoryMenuProps {
   tree: CategoryWithChildren[]
   variant?: 'desktop' | 'mobile'
+  showSubcategories?: boolean
   onClose?: () => void
 }
 
-export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMenuProps) {
+export function CategoryMenu({ tree, variant = 'desktop', showSubcategories = true, onClose }: CategoryMenuProps) {
   const locale = useLocale()
   const t = useTranslations('nav')
   const pathname = usePathname()
@@ -28,8 +29,7 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
   }
 
   function getCategoryHref(slug: string) {
-    const base = `/${locale}`
-    return `${base}/catalog/${slug}`
+    return `/${locale}/catalog/${slug}`
   }
 
   function isActive(slug: string) {
@@ -55,6 +55,7 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
             isActive={isActive}
             expandedIds={expandedIds}
             toggleExpand={toggleExpand}
+            showSubcategories={showSubcategories}
             onClose={onClose}
           />
         ))}
@@ -62,86 +63,119 @@ export function CategoryMenu({ tree, variant = 'desktop', onClose }: CategoryMen
     )
   }
 
-  return (
-    <nav className="hidden lg:flex items-center gap-1">
-      <Link
-        href={`/${locale}/catalog`}
-        className={cn(
-          'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
-          pathname.endsWith('/catalog') || pathname.endsWith('/catalog/')
-            ? 'text-[#1e3a5f] bg-[#1e3a5f]/10'
-            : 'text-[#1e3a5f]/70 hover:text-[#1e3a5f] hover:bg-[#1e3a5f]/10'
-        )}
-      >
-        {t('allProducts')}
-      </Link>
-      {tree.map((cat) => (
-        <DesktopCategoryItem
-          key={cat.id}
-          cat={cat}
-          locale={locale}
-          getCategoryHref={getCategoryHref}
-          isActive={isActive}
-        />
-      ))}
-    </nav>
-  )
+  return <DesktopCategoryDropdown tree={tree} locale={locale} t={t} pathname={pathname} getCategoryHref={getCategoryHref} isActive={isActive} />
 }
 
-function DesktopCategoryItem({
-  cat,
+function DesktopCategoryDropdown({
+  tree,
   locale,
+  t,
+  pathname,
   getCategoryHref,
   isActive,
 }: {
-  cat: CategoryWithChildren
+  tree: CategoryWithChildren[]
   locale: string
+  t: ReturnType<typeof useTranslations<'nav'>>
+  pathname: string
   getCategoryHref: (slug: string) => string
   isActive: (slug: string) => boolean
 }) {
   const [open, setOpen] = useState(false)
-  const hasChildren = (cat.children?.length ?? 0) > 0
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const isCatalogActive = pathname.includes('/catalog')
+
+  function handleEnter() {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setOpen(true)
+  }
+
+  function handleLeave() {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150)
+  }
+
+  useEffect(() => {
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current) }
+  }, [])
 
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-    >
-      <Link
-        href={getCategoryHref(cat.slug)}
-        className={cn(
-          'flex items-center gap-0.5 px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
-          isActive(cat.slug)
-            ? 'text-[#1e3a5f] bg-[#1e3a5f]/10'
-            : 'text-[#1e3a5f]/70 hover:text-[#1e3a5f] hover:bg-[#1e3a5f]/10'
-        )}
+    <nav className="hidden lg:flex items-center gap-1">
+      <div
+        ref={containerRef}
+        className="relative"
+        onMouseEnter={handleEnter}
+        onMouseLeave={handleLeave}
       >
-        {getLocalizedField(cat, locale)}
-        {hasChildren && <ChevronDown className="h-3 w-3 opacity-50" />}
-      </Link>
+        <div className="flex items-center">
+          <Link
+            href={`/${locale}/catalog`}
+            className={cn(
+              'flex items-center gap-1.5 pl-3 pr-1 py-2 text-sm font-medium rounded-l-md transition-colors',
+              isCatalogActive
+                ? 'text-[#1e3a5f] bg-[#1e3a5f]/10'
+                : 'text-[#1e3a5f]/70 hover:text-[#1e3a5f] hover:bg-[#1e3a5f]/5'
+            )}
+          >
+            <Grid3X3 className="h-4 w-4" />
+            {t('catalog')}
+          </Link>
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className={cn(
+              'flex items-center justify-center pr-2 pl-1 self-stretch text-sm font-medium rounded-r-md transition-colors',
+              isCatalogActive
+                ? 'text-[#1e3a5f] bg-[#1e3a5f]/10'
+                : 'text-[#1e3a5f]/70 hover:text-[#1e3a5f] hover:bg-[#1e3a5f]/5'
+            )}
+            aria-label="Toggle catalog menu"
+          >
+            <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
+          </button>
+        </div>
 
-      {hasChildren && open && (
-        <div className="absolute left-0 top-full pt-1 z-50">
-          <div className="bg-white border border-stone-200 rounded-lg shadow-lg py-1 min-w-40">
-            {cat.children!.map((child) => (
+        {open && (
+          <div className="absolute left-0 top-full pt-1 z-50">
+            <div className="bg-white border border-stone-200 rounded-xl shadow-xl p-4 min-w-[480px] max-w-[640px]">
+              {/* "All Products" link at top */}
               <Link
-                key={child.id}
-                href={getCategoryHref(child.slug)}
+                href={`/${locale}/catalog`}
                 className={cn(
-                  'block px-4 py-2 text-sm transition-colors',
-                  isActive(child.slug)
-                    ? 'text-stone-900 bg-stone-50'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                  'block px-3 py-2 text-sm font-semibold rounded-md transition-colors mb-2',
+                  pathname.endsWith('/catalog') || pathname.endsWith('/catalog/')
+                    ? 'text-[#1e3a5f] bg-[#1e3a5f]/10'
+                    : 'text-[#1e3a5f] hover:bg-[#1e3a5f]/5'
                 )}
               >
-                {getLocalizedField(child, locale)}
+                {t('allProducts')}
               </Link>
-            ))}
+
+              <div className="border-t border-stone-100 pt-3">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-1 max-h-[60vh] overflow-y-auto">
+                  {tree.map((cat) => (
+                    <div key={cat.id} className="mb-2">
+                      <Link
+                        href={getCategoryHref(cat.slug)}
+                        className={cn(
+                          'block px-2 py-1.5 text-sm font-semibold rounded-md transition-colors',
+                          isActive(cat.slug)
+                            ? 'text-[#1e3a5f] bg-[#1e3a5f]/10'
+                            : 'text-[#1e3a5f] hover:bg-[#1e3a5f]/5'
+                        )}
+                      >
+                        {getLocalizedField(cat, locale)}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </nav>
   )
 }
 
@@ -152,6 +186,7 @@ function MobileCategoryItem({
   isActive,
   expandedIds,
   toggleExpand,
+  showSubcategories = true,
   onClose,
 }: {
   cat: CategoryWithChildren
@@ -160,9 +195,10 @@ function MobileCategoryItem({
   isActive: (slug: string) => boolean
   expandedIds: string[]
   toggleExpand: (id: string) => void
+  showSubcategories?: boolean
   onClose?: () => void
 }) {
-  const hasChildren = (cat.children?.length ?? 0) > 0
+  const hasChildren = showSubcategories && (cat.children?.length ?? 0) > 0
   const isExpanded = expandedIds.includes(cat.id)
 
   return (

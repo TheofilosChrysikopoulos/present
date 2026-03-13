@@ -17,6 +17,7 @@ interface QuickAddToCartProps {
     price: number
     discount_price?: number | null
     moq: number
+    sellable_variants?: boolean
     product_images?: Array<{ storage_path: string; is_primary: boolean }>
   }
   selectedSize?: {
@@ -68,7 +69,8 @@ export function QuickAddToCart({ product, selectedSize, selectedVariant }: Quick
     e.preventDefault()
     e.stopPropagation()
 
-    const variantInfo = selectedVariant
+    const sellable = product.sellable_variants !== false
+    const variantInfo = selectedVariant && sellable
       ? {
           id: selectedVariant.id,
           skuSuffix: selectedVariant.sku_suffix,
@@ -92,7 +94,7 @@ export function QuickAddToCart({ product, selectedSize, selectedVariant }: Quick
       : null
 
     let sku = product.sku
-    if (selectedVariant?.sku_suffix) sku += selectedVariant.sku_suffix
+    if (sellable && selectedVariant?.sku_suffix) sku += selectedVariant.sku_suffix
     if (selectedSize?.sku_suffix) sku += ` ${selectedSize.sku_suffix}`
 
     const effectivePrice = selectedSize?.price ?? product.price
@@ -114,8 +116,8 @@ export function QuickAddToCart({ product, selectedSize, selectedVariant }: Quick
       variant: variantInfo,
       size: sizeInfo,
       primaryImagePath:
-        variantPrimaryImage?.storage_path ?? primaryImage?.storage_path ?? null,
-      variantId: selectedVariant?.id,
+        (sellable ? variantPrimaryImage?.storage_path : null) ?? primaryImage?.storage_path ?? null,
+      variantId: sellable ? selectedVariant?.id : undefined,
       sizeId: selectedSize?.id,
     })
 

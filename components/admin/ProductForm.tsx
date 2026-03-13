@@ -29,7 +29,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Category, ProductWithImages } from '@/lib/types'
 
 const productSchema = z.object({
-  sku: z.string().min(1, 'SKU is required').regex(/^[A-Z0-9\-_]+$/i, 'Use letters, numbers, hyphens only'),
+  sku: z.string().min(1, 'SKU is required').regex(/^[A-Z0-9\-_ ]+$/i, 'Use letters, numbers, hyphens, spaces only'),
   name_en: z.string().min(1, 'English name required'),
   name_el: z.string().min(1, 'Greek name required'),
   description_en: z.string().optional(),
@@ -40,9 +40,11 @@ const productSchema = z.object({
   category_id: z.string().optional(),
   tags: z.string().optional(),
   region: z.enum(['all', 'corfu', 'greece']),
+  company: z.string().optional(),
   is_featured: z.boolean(),
   is_new_arrival: z.boolean(),
   is_active: z.boolean(),
+  sellable_variants: z.boolean(),
 }).refine(
   (d) => !d.discount_price || parseFloat(d.discount_price) < parseFloat(d.price),
   { message: 'Sale price must be less than the original price', path: ['discount_price'] }
@@ -140,9 +142,11 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       category_id: product?.category_id ?? '',
       tags: product?.tags?.join(', ') ?? '',
       region: product?.region ?? 'all',
+      company: product?.company ?? '',
       is_featured: product?.is_featured ?? false,
       is_new_arrival: product?.is_new_arrival ?? false,
       is_active: product?.is_active ?? true,
+      sellable_variants: product?.sellable_variants ?? true,
     },
   })
 
@@ -169,6 +173,8 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           ? values.tags.split(',').map((t) => t.trim()).filter(Boolean)
           : [],
         region: values.region,
+        company: values.company || '',
+        sellable_variants: values.sellable_variants,
         is_featured: values.is_featured,
         is_new_arrival: values.is_new_arrival,
         is_active: values.is_active,
@@ -559,11 +565,23 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="company"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company / Brand</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Acme Corp" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Flags */}
             <div className="flex flex-wrap gap-6">
-              {(['is_featured', 'is_new_arrival', 'is_active'] as const).map(
+              {(['is_featured', 'is_new_arrival', 'is_active', 'sellable_variants'] as const).map(
                 (key) => (
                   <FormField
                     key={key}
@@ -584,7 +602,9 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                             ? 'Featured product'
                             : key === 'is_new_arrival'
                             ? 'New arrival'
-                            : 'Active (visible to buyers)'}
+                            : key === 'is_active'
+                            ? 'Active (visible to buyers)'
+                            : 'Sellable variants (users can order specific variants)'}
                         </FormLabel>
                       </FormItem>
                     )}

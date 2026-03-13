@@ -1,7 +1,10 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { getTranslations, getLocale } from 'next-intl/server'
+import Link from 'next/link'
 import type { Metadata } from 'next'
+
+export const dynamic = 'force-dynamic'
 import {
   getCategoryBySlug,
   getCategoryTree,
@@ -9,6 +12,7 @@ import {
   getCategoryDescendantIds,
 } from '@/lib/queries/categories'
 import { getProducts } from '@/lib/queries/products'
+import { getShowSubcategories } from '@/lib/queries/settings'
 import { getLocalizedField } from '@/lib/types'
 import { ProductGrid } from '@/components/catalog/ProductGrid'
 import { ProductFilters } from '@/components/catalog/ProductFilters'
@@ -45,9 +49,10 @@ export default async function CategoryPage({
   const { category: slug, locale } = await params
   const sp = await searchParams
 
-  const [category, tree] = await Promise.all([
+  const [category, tree, showSubcategories] = await Promise.all([
     getCategoryBySlug(slug),
     getCategoryTree(),
+    getShowSubcategories(),
   ])
 
   if (!category) notFound()
@@ -96,7 +101,7 @@ export default async function CategoryPage({
       <div className="flex gap-8">
         <div className="hidden lg:block w-52 flex-shrink-0">
           <Suspense>
-            <ProductFilters tree={tree} currentCategorySlug={slug} />
+            <ProductFilters tree={tree} currentCategorySlug={slug} showSubcategories={showSubcategories} />
           </Suspense>
         </div>
 
@@ -110,8 +115,71 @@ export default async function CategoryPage({
           ) : (
             <ProductGrid products={products as any} />
           )}
+
+          {totalPages > 1 && (
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              searchParams={sp}
+              locale={locale}
+              categorySlug={slug}
+            />
+          )}
         </div>
       </div>
+    </div>
+  )
+}
+
+function Pagination({
+  page,
+  totalPages,
+  searchParams,
+  locale,
+  categorySlug,
+}: {
+  page: number
+  totalPages: number
+  searchParams: Record<string, string | string[] | undefined>
+  locale: string
+  categorySlug: string
+}) {
+  function buildUrl(p: number) {
+    const params = new URLSearchParams()
+    Object.entries(searchParams).forEach(([key, val]) => {
+      if (key === 'page') return
+      if (Array.isArray(val)) {
+        val.forEach((v) => params.append(key, v))
+      } else if (val) {
+        params.set(key, val)
+      }
+    })
+    if (p > 1) params.set('page', String(p))
+    const qs = params.toString()
+    return `/${locale}/catalog/${categorySlug}${qs ? `?${qs}` : ''}`
+  }
+
+  return (
+    <div className="mt-8 flex items-center justify-center gap-2">
+      {page > 1 && (
+        <Link
+          href={buildUrl(page - 1)}
+          className="px-3 py-1.5 text-sm border border-slate-200 rounded-md text-slate-600 hover:bg-slate-50"
+        >
+          Previous
+        </Link>
+      )}
+      <span className="text-sm text-slate-500">
+        Page {page} of {totalPages}
+      </span>
+      {page < totalPages && (
+        <Link
+          href={buildUrl(page + 1)}
+          className="px-3 py-1.5 text-sm border border-slate-200 rounded-md text-slate-600 hover:bg-slate-50"
+        >
+          Next
+        </Link>
+      )}
     </div>
   )
 }

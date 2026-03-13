@@ -14,9 +14,10 @@ import { cn } from '@/lib/utils'
 interface ProductFiltersProps {
   tree: CategoryWithChildren[]
   currentCategorySlug?: string
+  showSubcategories?: boolean
 }
 
-export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProps) {
+export function ProductFilters({ tree, currentCategorySlug, showSubcategories = true }: ProductFiltersProps) {
   const t = useTranslations('catalog')
   const locale = useLocale()
   const router = useRouter()
@@ -92,6 +93,7 @@ export function ProductFilters({ tree, currentCategorySlug }: ProductFiltersProp
               locale={locale}
               base={base}
               currentSlug={currentCategorySlug}
+              showSubcategories={showSubcategories}
               depth={0}
             />
           ))}
@@ -129,16 +131,18 @@ function CategoryFilterItem({
   locale,
   base,
   currentSlug,
+  showSubcategories = true,
   depth,
 }: {
   cat: CategoryWithChildren
   locale: string
   base: string
   currentSlug?: string
+  showSubcategories?: boolean
   depth: number
 }) {
   const isActive = currentSlug === cat.slug
-  const hasChildren = (cat.children?.length ?? 0) > 0
+  const hasChildren = showSubcategories && (cat.children?.length ?? 0) > 0
 
   return (
     <div style={{ paddingLeft: depth > 0 ? `${depth * 12}px` : undefined }}>
@@ -162,6 +166,7 @@ function CategoryFilterItem({
             locale={locale}
             base={base}
             currentSlug={currentSlug}
+            showSubcategories={showSubcategories}
             depth={depth + 1}
           />
         ))}

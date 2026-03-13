@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Fragment } from 'react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -39,16 +40,16 @@ export async function CategoryBreadcrumb({
         </BreadcrumbItem>
 
         {ancestors.map((ancestor) => (
-          <>
-            <BreadcrumbSeparator key={`sep-${ancestor.id}`} />
-            <BreadcrumbItem key={ancestor.id}>
+          <Fragment key={ancestor.id}>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
               <BreadcrumbLink asChild>
                 <Link href={`${base}/catalog/${ancestor.slug}`}>
                   {getLocalizedField(ancestor, locale)}
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-          </>
+          </Fragment>
         ))}
 
         <BreadcrumbSeparator />

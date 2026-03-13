@@ -37,6 +37,8 @@ export interface Product {
   category_id: string | null
   tags: string[]
   region: 'all' | 'corfu' | 'greece'
+  company: string
+  sellable_variants: boolean
   is_featured: boolean
   is_new_arrival: boolean
   is_active: boolean
